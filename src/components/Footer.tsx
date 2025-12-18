@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Mail, Heart } from "lucide-react";
+import { Instagram, Facebook, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 
@@ -9,12 +9,15 @@ export function Footer() {
   return (
     <footer className="border-t border-border/50 bg-background/80 backdrop-blur-sm">
       <div className="container py-12 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Section */}
-          <div className="md:col-span-2">
-            <Link to="/" className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="PromptHub" className="h-10 w-10 rounded-xl object-cover" />
-              <span className="font-bold text-xl text-foreground">PromptHub</span>
+          <div>
+            <Link to="/" className="inline-block mb-4 group">
+              <img 
+                src={logo} 
+                alt="PromptHub" 
+                className="h-12 w-auto rounded-xl object-cover transition-all duration-300 group-hover:scale-105" 
+              />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mb-6">
               Discover, copy, and use curated prompts for your creative projects. 
@@ -39,13 +42,6 @@ export function Footer() {
               >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a
-                href="mailto:contact@prompthub.com"
-                className="p-2.5 rounded-lg bg-secondary/50 hover:bg-primary/10 hover:text-primary transition-colors"
-                aria-label="Contact via Email"
-              >
-                <Mail className="w-5 h-5" />
-              </a>
             </div>
           </div>
 
@@ -61,6 +57,28 @@ export function Footer() {
               <li>
                 <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Browse Prompts
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4">Legal</h3>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  About Us
                 </Link>
               </li>
             </ul>
