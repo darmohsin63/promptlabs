@@ -6,10 +6,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 import logo from "@/assets/logo.jpg";
 
 const FACEBOOK_URL = "https://facebook.com/darmohasin13";
 const INSTAGRAM_URL = "https://instagram.com/darmohsin63";
+
+// Validation schema for feedback form
+const feedbackSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .max(255, "Email must be less than 255 characters")
+    .email("Please enter a valid email address"),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Message must be at least 10 characters")
+    .max(2000, "Message must be less than 2000 characters"),
+});
 
 export function Footer() {
   const [email, setEmail] = useState("");
@@ -20,20 +36,25 @@ export function Footer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email.trim() || !message.trim()) {
+    // Validate input with zod
+    const validationResult = feedbackSchema.safeParse({ email, message });
+    
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
       toast({
-        title: "Missing fields",
-        description: "Please enter both email and message.",
+        title: "Validation Error",
+        description: firstError.message,
         variant: "destructive",
       });
       return;
     }
 
+    const validatedData = validationResult.data;
     setIsSubmitting(true);
     
     const { error } = await supabase.from("feedback").insert({
-      email: email.trim(),
-      message: message.trim(),
+      email: validatedData.email,
+      message: validatedData.message,
     });
 
     setIsSubmitting(false);
