@@ -5,13 +5,13 @@ import { PromptCard } from "@/components/PromptCard";
 import { usePrompts } from "@/hooks/usePrompts";
 
 const Index = () => {
-  const { prompts } = usePrompts();
+  const { prompts, loading } = usePrompts();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredPrompts = prompts.filter(
     (prompt) =>
       prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prompt.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (prompt.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       prompt.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -63,7 +63,11 @@ const Index = () => {
             </span>
           </div>
 
-          {filteredPrompts.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">Loading prompts...</p>
+            </div>
+          ) : filteredPrompts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPrompts.map((prompt, index) => (
                 <PromptCard key={prompt.id} prompt={prompt} index={index} />

@@ -1,23 +1,36 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { ImagePlus, Sparkles } from "lucide-react";
 import { Header } from "@/components/Header";
 import { usePrompts } from "@/hooks/usePrompts";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
 const Upload = () => {
   const navigate = useNavigate();
   const { addPrompt } = usePrompts();
+  const { user, loading } = useAuth();
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    promptText: "",
+    content: "",
     author: "",
-    imageUrl: "",
+    image_url: "",
   });
 
   const [previewImage, setPreviewImage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add prompts",
+      });
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -25,15 +38,24 @@ const Upload = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (name === "imageUrl" && value) {
+    if (name === "image_url" && value) {
       setPreviewImage(value);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.promptText || !formData.author) {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add prompts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.title || !formData.content || !formData.author) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -42,13 +64,29 @@ const Upload = () => {
       return;
     }
 
-    addPrompt({
-      title: formData.title,
-      description: formData.description || formData.title,
-      promptText: formData.promptText,
-      author: formData.author,
-      imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60",
-    });
+    setIsSubmitting(true);
+
+    const { error } = await addPrompt(
+      {
+        title: formData.title,
+        description: formData.description || formData.title,
+        content: formData.content,
+        author: formData.author,
+        image_url: formData.image_url || null,
+      },
+      user.id
+    );
+
+    setIsSubmitting(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
 
     toast({
       title: "Prompt added!",
@@ -57,6 +95,34 @@ const Upload = () => {
 
     navigate("/");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-16 text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-16 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Sign in required</h1>
+          <p className="text-muted-foreground mb-8">
+            You need to sign in to add prompts.
+          </p>
+          <Link to="/auth" className="btn-primary">
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,14 +164,14 @@ const Upload = () => {
 
             {/* Image URL */}
             <div>
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="image_url" className="block text-sm font-medium text-foreground mb-2">
                 Image URL
               </label>
               <input
                 type="url"
-                id="imageUrl"
-                name="imageUrl"
-                value={formData.imageUrl}
+                id="image_url"
+                name="image_url"
+                value={formData.image_url}
                 onChange={handleChange}
                 placeholder="https://example.com/image.jpg"
                 className="input-field"
@@ -147,13 +213,13 @@ const Upload = () => {
 
             {/* Prompt Text */}
             <div>
-              <label htmlFor="promptText" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="content" className="block text-sm font-medium text-foreground mb-2">
                 Full Prompt <span className="text-destructive">*</span>
               </label>
               <textarea
-                id="promptText"
-                name="promptText"
-                value={formData.promptText}
+                id="content"
+                name="content"
+                value={formData.content}
                 onChange={handleChange}
                 placeholder="Enter the complete prompt text..."
                 rows={6}
@@ -182,10 +248,11 @@ const Upload = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={isSubmitting}
               className="btn-primary w-full flex items-center justify-center gap-2 py-4"
             >
               <Sparkles className="w-5 h-5" />
-              Publish Prompt
+              {isSubmitting ? "Publishing..." : "Publish Prompt"}
             </button>
           </form>
         </div>

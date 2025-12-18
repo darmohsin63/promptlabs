@@ -1,8 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Plus } from "lucide-react";
+import { Sparkles, Plus, LogIn, LogOut, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   const location = useLocation();
+  const { user, signOut, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -25,13 +28,39 @@ export function Header() {
           >
             Browse
           </Link>
-          <Link
-            to="/upload"
-            className="btn-primary flex items-center gap-2 text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Prompt</span>
-          </Link>
+
+          {!loading && (
+            <>
+              {user ? (
+                <>
+                  <Link
+                    to="/upload"
+                    className="btn-primary flex items-center gap-2 text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Add Prompt</span>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => signOut()}
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sign Out</span>
+                  </Button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </Link>
+              )}
+            </>
+          )}
         </nav>
       </div>
     </header>

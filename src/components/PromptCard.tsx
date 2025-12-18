@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Calendar, User } from "lucide-react";
-import { Prompt } from "@/types/prompt";
+import { Prompt } from "@/hooks/usePrompts";
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -16,7 +16,7 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
     >
       <div className="aspect-[4/3] overflow-hidden">
         <img
-          src={prompt.imageUrl}
+          src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
           alt={prompt.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -26,7 +26,7 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
           {prompt.title}
         </h3>
         <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-          {prompt.description}
+          {prompt.description || prompt.title}
         </p>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
@@ -35,7 +35,7 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
           </span>
           <span className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
-            {new Date(prompt.createdAt).toLocaleDateString("en-US", {
+            {new Date(prompt.created_at).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
             })}
