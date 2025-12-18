@@ -20,25 +20,26 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
+      {/* Hero Section - Premium Cinematic */}
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* 3D Background */}
+        {/* 3D Cinematic Background */}
         <Suspense fallback={null}>
           <HeroScene3D />
         </Suspense>
         
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 z-[1]" />
+        {/* Premium gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/30 to-background z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-accent/8 z-[1]" />
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/50 z-[1]" />
         
-        {/* Animated grid background */}
-        <div className="absolute inset-0 z-[1] opacity-20">
+        {/* Subtle animated grid - futuristic room floor effect */}
+        <div className="absolute inset-0 z-[1] opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `
-              linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px)
+              linear-gradient(to right, hsl(var(--primary) / 0.15) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(var(--primary) / 0.15) 1px, transparent 1px)
             `,
-            backgroundSize: '60px 60px',
+            backgroundSize: '80px 80px',
           }} />
         </div>
         
