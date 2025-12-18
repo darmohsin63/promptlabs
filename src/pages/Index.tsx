@@ -21,16 +21,20 @@ const Index = () => {
 
       {/* Hero Section */}
       <section className="hero-gradient pt-20 md:pt-28 pb-12 md:pb-20 relative overflow-hidden">
-        <div className="container text-center relative z-10">
+        {/* Floating orbs */}
+        <div className="floating-orb floating-orb-1" />
+        <div className="floating-orb floating-orb-2" />
+        
+        <div className="container text-center relative z-10 perspective-container">
           {/* Floating badge */}
-          <div className="inline-flex items-center gap-2 glass-card !rounded-full px-4 py-2 mb-6 animate-fade-up">
+          <div className="inline-flex items-center gap-2 glass-card !rounded-full px-4 py-2 mb-6 animate-fade-up glow-border">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-foreground">Discover AI Prompts</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 animate-fade-up stagger-1 leading-tight">
             Create with
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"> Amazing Prompts</span>
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer"> Amazing Prompts</span>
           </h1>
           <p
             className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-10 animate-fade-up stagger-2 leading-relaxed px-4"
@@ -53,10 +57,6 @@ const Index = () => {
             />
           </div>
         </div>
-
-        {/* Decorative blobs */}
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
       </section>
 
       {/* Prompts Grid */}
