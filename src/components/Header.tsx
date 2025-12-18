@@ -1,28 +1,31 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Plus, LogIn, LogOut, User } from "lucide-react";
+import { Sparkles, Plus, LogIn, LogOut, Menu, X } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
   const location = useLocation();
   const { user, signOut, loading } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-      <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center transition-transform group-hover:scale-105">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
+    <header className="glass-header safe-top">
+      <div className="container flex items-center justify-between h-14 md:h-16">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center transition-transform group-hover:scale-105 shadow-glow">
+            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-foreground">Prompt Hub</span>
+          <span className="text-lg md:text-xl font-semibold text-foreground">Prompt Hub</span>
         </Link>
 
-        <nav className="flex items-center gap-2">
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-2">
           <Link
             to="/"
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
               location.pathname === "/"
-                ? "bg-secondary text-foreground"
+                ? "glass-card !rounded-xl"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             }`}
           >
@@ -35,34 +38,91 @@ export function Header() {
                 <>
                   <Link
                     to="/upload"
-                    className="btn-primary flex items-center gap-2 text-sm"
+                    className="btn-primary flex items-center gap-2 text-sm !py-2.5 !px-4"
                   >
                     <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Add Prompt</span>
+                    Add Prompt
                   </Link>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => signOut()}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground rounded-xl"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sign Out</span>
+                    Sign Out
                   </Button>
                 </>
               ) : (
                 <Link
                   to="/auth"
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  className="btn-primary flex items-center gap-2 text-sm !py-2.5 !px-4"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span className="hidden sm:inline">Sign In</span>
+                  Sign In
                 </Link>
               )}
             </>
           )}
         </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 glass-panel !rounded-none !rounded-b-3xl mx-4 mb-4 animate-slide-up safe-bottom">
+          <nav className="flex flex-col gap-2">
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                location.pathname === "/" ? "bg-primary/10 text-primary" : "text-foreground"
+              }`}
+            >
+              Browse Prompts
+            </Link>
+            
+            {!loading && (
+              <>
+                {user ? (
+                  <>
+                    <Link
+                      to="/upload"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Prompt
+                    </Link>
+                    <button
+                      onClick={() => { signOut(); setMobileMenuOpen(false); }}
+                      className="px-4 py-3 rounded-xl font-medium text-muted-foreground flex items-center gap-2 text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/auth"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="btn-primary text-center mt-2"
+                  >
+                    Sign In
+                  </Link>
+                )}
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

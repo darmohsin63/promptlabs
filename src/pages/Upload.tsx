@@ -100,8 +100,8 @@ const Upload = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-16 text-center">
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="container pt-24 pb-12 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -111,14 +111,16 @@ const Upload = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Sign in required</h1>
-          <p className="text-muted-foreground mb-8">
-            You need to sign in to add prompts.
-          </p>
-          <Link to="/auth" className="btn-primary">
-            Sign In
-          </Link>
+        <div className="container pt-24 pb-12 px-4 text-center">
+          <div className="glass-panel max-w-md mx-auto">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Sign in required</h1>
+            <p className="text-muted-foreground mb-8">
+              You need to sign in to add prompts.
+            </p>
+            <Link to="/auth" className="btn-primary">
+              Sign In
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -128,24 +130,24 @@ const Upload = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-8 md:py-12">
+      <main className="container pt-20 pb-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+          <div className="text-center mb-10 animate-fade-up">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary to-accent mx-auto flex items-center justify-center mb-6 shadow-glow">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
               Share Your Prompt
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">
               Add a new prompt to the collection and help others create amazing content.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 animate-fade-up stagger-1">
             {/* Image Preview */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Preview Image
-              </label>
-              <div className="relative rounded-xl overflow-hidden bg-muted aspect-video flex items-center justify-center">
+            <div className="glass-panel !p-0 overflow-hidden">
+              <div className="relative aspect-video flex items-center justify-center bg-muted/30">
                 {previewImage ? (
                   <img
                     src={previewImage}
@@ -154,8 +156,8 @@ const Upload = () => {
                     onError={() => setPreviewImage("")}
                   />
                 ) : (
-                  <div className="text-center text-muted-foreground">
-                    <ImagePlus className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <div className="text-center text-muted-foreground p-8">
+                    <ImagePlus className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="text-sm">Enter an image URL below</p>
                   </div>
                 )}
@@ -249,10 +251,19 @@ const Upload = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary w-full flex items-center justify-center gap-2 py-4"
+              className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-base"
             >
-              <Sparkles className="w-5 h-5" />
-              {isSubmitting ? "Publishing..." : "Publish Prompt"}
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Publishing...
+                </span>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  Publish Prompt
+                </>
+              )}
             </button>
           </form>
         </div>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Mail, Lock, User } from "lucide-react";
+import { Sparkles, Mail, Lock, User, ArrowRight } from "lucide-react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -69,45 +69,45 @@ export default function Auth() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-12">
+      <main className="container pt-20 pb-12 px-4">
         <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary mx-auto flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 text-primary-foreground" />
+          <div className="text-center mb-8 animate-fade-up">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-br from-primary to-accent mx-auto flex items-center justify-center mb-6 shadow-glow">
+              <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {isLogin ? "Welcome back" : "Create an account"}
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+              {isLogin ? "Welcome back" : "Create account"}
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 text-sm md:text-base">
               {isLogin
                 ? "Sign in to manage your prompts"
                 : "Join Prompt Hub and start sharing"}
             </p>
           </div>
 
-          <div className="bg-card rounded-2xl p-6 shadow-soft border border-border">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="glass-panel animate-fade-up stagger-1">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
+                  <Label htmlFor="displayName" className="text-sm font-medium">Display Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="displayName"
                       type="text"
                       placeholder="Your name"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="pl-10"
+                      className="input-field pl-11"
                     />
                   </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -115,15 +115,15 @@ export default function Auth() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10"
+                    className="input-field pl-11"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
@@ -132,25 +132,35 @@ export default function Auth() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="pl-10"
+                    className="input-field pl-11"
                   />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full btn-primary"
+                className="w-full btn-primary h-12 text-base"
                 disabled={isLoading}
               >
-                {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Please wait...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    {isLogin ? "Sign In" : "Create Account"}
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                )}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 pt-6 border-t border-border/50 text-center">
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-primary hover:underline"
+                className="text-sm text-primary hover:underline font-medium"
               >
                 {isLogin
                   ? "Don't have an account? Sign up"
@@ -161,7 +171,7 @@ export default function Auth() {
 
           <p className="text-center mt-6 text-sm text-muted-foreground">
             Are you an admin?{" "}
-            <Link to="/admin" className="text-primary hover:underline">
+            <Link to="/admin" className="text-primary hover:underline font-medium">
               Admin Login
             </Link>
           </p>
