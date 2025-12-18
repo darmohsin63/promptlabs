@@ -2,6 +2,11 @@ import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Sphere, MeshDistortMaterial, Stars } from "@react-three/drei";
 import * as THREE from "three";
+import { RobotAvatar } from "./RobotAvatar";
+
+// Social URLs - Update these with your actual profiles
+const FACEBOOK_URL = "https://facebook.com/yourprofile";
+const INSTAGRAM_URL = "https://instagram.com/yourprofile";
 
 function AnimatedSphere({ position, color, speed = 1, distort = 0.4, size = 1 }: {
   position: [number, number, number];
@@ -82,7 +87,7 @@ function NeuralNetwork() {
   });
 
   return (
-    <group position={[0, 0, -2]}>
+    <group position={[0, 0, -4]}>
       <points ref={pointsRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -93,10 +98,10 @@ function NeuralNetwork() {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.08}
+          size={0.06}
           color="#22d3ee"
           transparent
-          opacity={0.8}
+          opacity={0.6}
           sizeAttenuation
         />
       </points>
@@ -109,64 +114,21 @@ function NeuralNetwork() {
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="#22d3ee" transparent opacity={0.15} />
+        <lineBasicMaterial color="#22d3ee" transparent opacity={0.1} />
       </lineSegments>
     </group>
   );
 }
 
-function FloatingRing({ radius, color, speed }: { radius: number; color: string; speed: number }) {
-  const ringRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.x = state.clock.elapsedTime * speed;
-      ringRef.current.rotation.z = state.clock.elapsedTime * speed * 0.5;
-    }
-  });
-
-  return (
-    <mesh ref={ringRef}>
-      <torusGeometry args={[radius, 0.02, 16, 100]} />
-      <meshBasicMaterial color={color} transparent opacity={0.4} />
-    </mesh>
-  );
-}
-
-function CoreOrb() {
-  const groupRef = useRef<THREE.Group>(null);
-  const innerRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-    }
-    if (innerRef.current) {
-      innerRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 2) * 0.05);
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Core glowing sphere */}
-      <Sphere ref={innerRef} args={[0.5, 64, 64]}>
-        <meshBasicMaterial color="#22d3ee" transparent opacity={0.9} />
-      </Sphere>
-      
-      {/* Outer glow */}
-      <Sphere args={[0.7, 32, 32]}>
-        <meshBasicMaterial color="#22d3ee" transparent opacity={0.1} />
-      </Sphere>
-
-      {/* Orbiting rings */}
-      <FloatingRing radius={1.2} color="#22d3ee" speed={0.5} />
-      <FloatingRing radius={1.5} color="#f59e0b" speed={-0.3} />
-      <FloatingRing radius={1.8} color="#22d3ee" speed={0.4} />
-    </group>
-  );
-}
-
 export function HeroScene3D() {
+  const handleFacebookClick = () => {
+    window.open(FACEBOOK_URL, "_blank");
+  };
+
+  const handleInstagramClick = () => {
+    window.open(INSTAGRAM_URL, "_blank");
+  };
+
   return (
     <div className="absolute inset-0 z-0">
       <Canvas
@@ -174,20 +136,26 @@ export function HeroScene3D() {
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent" }}
       >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} color="#22d3ee" />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#f59e0b" />
+        <ambientLight intensity={0.6} />
+        <pointLight position={[10, 10, 10]} intensity={1.5} color="#22d3ee" />
+        <pointLight position={[-10, -10, -10]} intensity={0.8} color="#f59e0b" />
+        <pointLight position={[0, 5, 5]} intensity={0.5} color="#ffffff" />
 
-        <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+        <Stars radius={100} depth={50} count={1500} factor={4} saturation={0} fade speed={1} />
         
         <NeuralNetwork />
-        <CoreOrb />
+        
+        {/* Robot Avatar with social logos */}
+        <RobotAvatar 
+          onFacebookClick={handleFacebookClick}
+          onInstagramClick={handleInstagramClick}
+        />
         
         {/* Floating accent spheres */}
-        <AnimatedSphere position={[-3, 1.5, -1]} color="#22d3ee" speed={0.5} distort={0.3} size={0.3} />
-        <AnimatedSphere position={[3, -1, -2]} color="#f59e0b" speed={0.7} distort={0.4} size={0.25} />
-        <AnimatedSphere position={[2.5, 2, -1.5]} color="#22d3ee" speed={0.6} distort={0.35} size={0.2} />
-        <AnimatedSphere position={[-2.5, -1.5, -1]} color="#f59e0b" speed={0.8} distort={0.3} size={0.15} />
+        <AnimatedSphere position={[-4, 2, -2]} color="#22d3ee" speed={0.5} distort={0.3} size={0.2} />
+        <AnimatedSphere position={[4, -2, -3]} color="#f59e0b" speed={0.7} distort={0.4} size={0.15} />
+        <AnimatedSphere position={[3.5, 2.5, -2]} color="#22d3ee" speed={0.6} distort={0.35} size={0.12} />
+        <AnimatedSphere position={[-3.5, -2, -2]} color="#f59e0b" speed={0.8} distort={0.3} size={0.1} />
       </Canvas>
     </div>
   );
