@@ -3,6 +3,7 @@ import { Sparkles, Plus, LogIn, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Header() {
   const location = useLocation();
@@ -13,8 +14,8 @@ export function Header() {
     <header className="glass-header safe-top">
       <div className="container flex items-center justify-between h-14 md:h-16">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center transition-transform group-hover:scale-105 shadow-glow">
-            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
+          <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-glow">
+            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
           </div>
           <span className="text-lg md:text-xl font-semibold text-foreground">Prompt Hub</span>
         </Link>
@@ -23,9 +24,9 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-2">
           <Link
             to="/"
-            className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+            className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
               location.pathname === "/"
-                ? "glass-card !rounded-xl"
+                ? "glass-card !rounded-xl text-primary"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             }`}
           >
@@ -64,15 +65,20 @@ export function Header() {
               )}
             </>
           )}
+          
+          <ThemeToggle />
         </nav>
 
         {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-xl hover:bg-secondary/50 transition-colors"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
