@@ -6,8 +6,8 @@ import { usePrompts } from "@/hooks/usePrompts";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
-  const { prompts, loading } = usePrompts();
   const [searchQuery, setSearchQuery] = useState("");
+  const { prompts, loading } = usePrompts();
 
   const filteredPrompts = prompts.filter(
     (prompt) =>
