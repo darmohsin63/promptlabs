@@ -1,14 +1,16 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, User, Copy, ExternalLink, Check } from "lucide-react";
+import { ArrowLeft, Calendar, User, Copy, ExternalLink, Check, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { usePrompts, Prompt } from "@/hooks/usePrompts";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
 const PromptDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getPromptById } = usePrompts();
+  const { isAdmin } = useAuth();
   const [copied, setCopied] = useState(false);
   const [prompt, setPrompt] = useState<Prompt | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,6 +167,15 @@ const PromptDetail = () => {
                 <ExternalLink className="w-4 h-4" />
                 Try This Prompt
               </button>
+              {isAdmin && (
+                <Link 
+                  to={`/upload?edit=${prompt.id}`} 
+                  className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit Prompt
+                </Link>
+              )}
             </div>
           </div>
         </div>
