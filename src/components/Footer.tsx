@@ -63,46 +63,6 @@ export function Footer() {
                   Browse Prompts
                 </Link>
               </li>
-              <li>
-                <Link to="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Admin Panel
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Connect</h3>
-            <ul className="space-y-3">
-              <li>
-                <a 
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a 
-                  href={FACEBOOK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Facebook
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="mailto:contact@prompthub.com"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Contact Us
-                </a>
-              </li>
             </ul>
           </div>
         </div>
