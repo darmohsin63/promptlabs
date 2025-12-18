@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Prompt {
@@ -53,7 +53,7 @@ export function usePrompts() {
     return { data: null, error };
   };
 
-  const getPromptById = async (id: string) => {
+  const getPromptById = useCallback(async (id: string) => {
     const { data, error } = await supabase
       .from("prompts")
       .select("*")
@@ -61,7 +61,7 @@ export function usePrompts() {
       .maybeSingle();
 
     return { data, error };
-  };
+  }, []);
 
   const deletePrompt = async (id: string) => {
     const { error } = await supabase.from("prompts").delete().eq("id", id);
