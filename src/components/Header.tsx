@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Plus, LogIn, LogOut, Menu, X, Shield } from "lucide-react";
+import { Plus, LogIn, LogOut, Menu, X, Shield } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import logo from "@/assets/logo.jpg";
 
 export function Header() {
   const location = useLocation();
@@ -14,10 +15,11 @@ export function Header() {
     <header className="glass-header safe-top">
       <div className="container flex items-center justify-between h-14 md:h-16">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-glow">
-            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg md:text-xl font-semibold text-foreground">Prompt Hub</span>
+          <img 
+            src={logo} 
+            alt="PromptHub Logo" 
+            className="h-8 md:h-10 w-auto rounded-lg transition-all duration-300 group-hover:scale-105"
+          />
         </Link>
 
         {/* Desktop Nav */}
