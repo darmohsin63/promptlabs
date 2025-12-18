@@ -7,15 +7,18 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1.5rem",
+      padding: "1rem",
       screens: {
-        "2xl": "1280px",
+        sm: "100%",
+        md: "100%",
+        lg: "1024px",
+        xl: "1200px",
       },
     },
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['SF Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -51,13 +54,27 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        glass: {
+          DEFAULT: "hsl(var(--glass-bg))",
+          border: "hsl(var(--glass-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "1rem",
-        "2xl": "1.25rem",
+        xl: "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "2rem",
+      },
+      boxShadow: {
+        glass: "var(--shadow-glass)",
+        "glass-hover": "var(--shadow-glass-hover)",
+        glow: "var(--shadow-glow)",
+        inset: "var(--shadow-inset)",
+      },
+      backdropBlur: {
+        glass: "var(--glass-blur)",
       },
       keyframes: {
         "accordion-down": {
@@ -68,10 +85,20 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shimmer: "shimmer 2s linear infinite",
+        float: "float 3s ease-in-out infinite",
       },
     },
   },

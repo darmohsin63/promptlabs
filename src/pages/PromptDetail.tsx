@@ -28,8 +28,8 @@ const PromptDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-16 text-center">
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="container pt-24 pb-12 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -39,15 +39,17 @@ const PromptDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Prompt not found</h1>
-          <p className="text-muted-foreground mb-8">
-            The prompt you're looking for doesn't exist.
-          </p>
-          <Link to="/" className="btn-primary inline-flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
+        <div className="container pt-24 pb-12 px-4 text-center">
+          <div className="glass-panel max-w-md mx-auto">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Prompt not found</h1>
+            <p className="text-muted-foreground mb-8">
+              The prompt you're looking for doesn't exist.
+            </p>
+            <Link to="/" className="btn-primary inline-flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -82,11 +84,11 @@ const PromptDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-8 md:py-12">
+      <main className="container pt-20 pb-12 px-4">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 animate-fade-up"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
@@ -94,7 +96,7 @@ const PromptDetail = () => {
 
         <div className="max-w-4xl mx-auto">
           {/* Image */}
-          <div className="rounded-2xl overflow-hidden mb-8 animate-scale-in">
+          <div className="glass-card overflow-hidden mb-8 animate-scale-in">
             <img
               src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
               alt={prompt.title}
@@ -103,19 +105,19 @@ const PromptDetail = () => {
           </div>
 
           {/* Content */}
-          <div className="animate-fade-up">
+          <div className="animate-fade-up stagger-1">
             {/* Title & Meta */}
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
               {prompt.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
-              <span className="flex items-center gap-1.5">
-                <User className="w-4 h-4" />
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
+              <span className="flex items-center gap-1.5 glass-card !rounded-full px-3 py-1.5 !bg-secondary/50">
+                <User className="w-3.5 h-3.5" />
                 {prompt.author}
               </span>
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-3.5 h-3.5" />
                 {new Date(prompt.created_at).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
@@ -124,25 +126,29 @@ const PromptDetail = () => {
               </span>
             </div>
 
-            <p className="text-lg text-muted-foreground mb-8">
-              {prompt.description}
-            </p>
+            {prompt.description && (
+              <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed">
+                {prompt.description}
+              </p>
+            )}
 
             {/* Prompt Box */}
-            <div className="mb-8">
+            <div className="mb-8 animate-fade-up stagger-2">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Prompt
                 </h2>
               </div>
-              <div className="prompt-box">
-                <p className="text-foreground whitespace-pre-wrap">{prompt.content}</p>
+              <div className="glass-panel !p-5 md:!p-6">
+                <p className="text-foreground whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                  {prompt.content}
+                </p>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <button onClick={handleCopy} className="btn-primary flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-3 animate-fade-up stagger-3">
+              <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none">
                 {copied ? (
                   <>
                     <Check className="w-4 h-4" />
@@ -155,7 +161,7 @@ const PromptDetail = () => {
                   </>
                 )}
               </button>
-              <button onClick={handleTry} className="btn-secondary flex items-center gap-2">
+              <button onClick={handleTry} className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none">
                 <ExternalLink className="w-4 h-4" />
                 Try This Prompt
               </button>
