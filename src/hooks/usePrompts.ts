@@ -71,5 +71,23 @@ export function usePrompts() {
     return { error };
   };
 
-  return { prompts, loading, addPrompt, getPromptById, deletePrompt, refetch: fetchPrompts };
+  const updatePrompt = async (
+    id: string,
+    updates: Partial<Omit<Prompt, "id" | "created_at" | "user_id">>
+  ) => {
+    const { data, error } = await supabase
+      .from("prompts")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (!error && data) {
+      setPrompts(prompts.map((p) => (p.id === id ? data : p)));
+      return { data, error: null };
+    }
+    return { data: null, error };
+  };
+
+  return { prompts, loading, addPrompt, getPromptById, deletePrompt, updatePrompt, refetch: fetchPrompts };
 }
