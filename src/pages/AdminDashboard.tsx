@@ -4,8 +4,31 @@ import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Trash2, Users, FileText, LogOut, BarChart3, Eye } from "lucide-react";
+import { 
+  Shield, 
+  Trash2, 
+  Users, 
+  FileText, 
+  LogOut, 
+  Eye, 
+  UserPlus, 
+  Crown,
+  UserX,
+  Search,
+  Plus,
+  X
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface Prompt {
   id: string;
@@ -21,13 +44,25 @@ interface Profile {
   created_at: string;
 }
 
+interface UserRole {
+  user_id: string;
+  role: "admin" | "user";
+}
+
 export default function AdminDashboard() {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [activeTab, setActiveTab] = useState<"prompts" | "users">("prompts");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [isAddingUser, setIsAddingUser] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -42,13 +77,15 @@ export default function AdminDashboard() {
   }, [isAdmin]);
 
   const fetchData = async () => {
-    const [promptsRes, usersRes] = await Promise.all([
+    const [promptsRes, usersRes, rolesRes] = await Promise.all([
       supabase.from("prompts").select("id, title, author, created_at").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, created_at").order("created_at", { ascending: false }),
+      supabase.from("user_roles").select("user_id, role"),
     ]);
 
     if (promptsRes.data) setPrompts(promptsRes.data);
     if (usersRes.data) setUsers(usersRes.data);
+    if (rolesRes.data) setUserRoles(rolesRes.data as UserRole[]);
   };
 
   const deletePrompt = async (id: string) => {
@@ -61,6 +98,128 @@ export default function AdminDashboard() {
     }
   };
 
+  const isUserAdmin = (userId: string) => {
+    return userRoles.some(r => r.user_id === userId && r.role === "admin");
+  };
+
+  const toggleAdminRole = async (userId: string) => {
+    const currentlyAdmin = isUserAdmin(userId);
+    
+    if (userId === user?.id) {
+      toast({ 
+        title: "Cannot modify yourself", 
+        description: "You cannot remove your own admin role.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (currentlyAdmin) {
+      // Remove admin role
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId)
+        .eq("role", "admin");
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Role updated", description: "Admin role removed." });
+        setUserRoles(userRoles.filter(r => !(r.user_id === userId && r.role === "admin")));
+      }
+    } else {
+      // Add admin role
+      const { error } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: "admin" });
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Role updated", description: "User is now an admin." });
+        setUserRoles([...userRoles, { user_id: userId, role: "admin" }]);
+      }
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (userId === user?.id) {
+      toast({ 
+        title: "Cannot delete yourself", 
+        description: "You cannot delete your own account.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    // Delete user's prompts first
+    await supabase.from("prompts").delete().eq("user_id", userId);
+    
+    // Delete user roles
+    await supabase.from("user_roles").delete().eq("user_id", userId);
+    
+    // Delete profile
+    const { error } = await supabase.from("profiles").delete().eq("id", userId);
+    
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "User deleted", description: "User and their data have been removed." });
+      setUsers(users.filter(u => u.id !== userId));
+      setUserRoles(userRoles.filter(r => r.user_id !== userId));
+    }
+  };
+
+  const addNewUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAddingUser(true);
+
+    try {
+      // Create user via Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: newUserEmail,
+        password: newUserPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: newUserName || newUserEmail.split("@")[0],
+          },
+        },
+      });
+
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      toast({ 
+        title: "User created", 
+        description: "New user account has been created successfully." 
+      });
+      
+      setShowAddUserModal(false);
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserName("");
+      
+      // Refresh data
+      setTimeout(fetchData, 1000);
+    } finally {
+      setIsAddingUser(false);
+    }
+  };
+
+  const filteredPrompts = prompts.filter(p => 
+    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.author.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredUsers = users.filter(u => 
+    (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (u.display_name || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -68,6 +227,8 @@ export default function AdminDashboard() {
       </div>
     );
   }
+
+  const adminCount = userRoles.filter(r => r.role === "admin").length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,8 +238,8 @@ export default function AdminDashboard() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 animate-fade-up">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
-              <Shield className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
+              <Shield className="w-7 h-7 text-primary-foreground" />
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground">Admin Dashboard</h1>
@@ -96,7 +257,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-8 animate-fade-up stagger-1">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-up stagger-1">
           <div className="glass-panel flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
               <FileText className="w-6 h-6 text-primary" />
@@ -115,12 +276,53 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground">Total Users</p>
             </div>
           </div>
+          <div className="glass-panel flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Crown className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl md:text-3xl font-bold text-foreground">{adminCount}</p>
+              <p className="text-sm text-muted-foreground">Admins</p>
+            </div>
+          </div>
+          <div className="glass-panel flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
+              <Users className="w-6 h-6 text-accent" />
+            </div>
+            <div>
+              <p className="text-2xl md:text-3xl font-bold text-foreground">{users.length - adminCount}</p>
+              <p className="text-sm text-muted-foreground">Regular Users</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 animate-fade-up stagger-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={`Search ${activeTab}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="input-field pl-11"
+            />
+          </div>
+          {activeTab === "users" && (
+            <Button 
+              onClick={() => setShowAddUserModal(true)}
+              className="btn-primary flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add User
+            </Button>
+          )}
         </div>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 animate-fade-up stagger-2">
           <button
-            onClick={() => setActiveTab("prompts")}
+            onClick={() => { setActiveTab("prompts"); setSearchQuery(""); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 ${
               activeTab === "prompts"
                 ? "btn-primary !py-2.5"
@@ -132,7 +334,7 @@ export default function AdminDashboard() {
             <span className="text-xs opacity-70">({prompts.length})</span>
           </button>
           <button
-            onClick={() => setActiveTab("users")}
+            onClick={() => { setActiveTab("users"); setSearchQuery(""); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 ${
               activeTab === "users"
                 ? "btn-primary !py-2.5"
@@ -158,7 +360,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {prompts.map((prompt, index) => (
+                {filteredPrompts.map((prompt, index) => (
                   <tr 
                     key={prompt.id} 
                     className="border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up"
@@ -196,10 +398,12 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
             </table>
-            {prompts.length === 0 && (
+            {filteredPrompts.length === 0 && (
               <div className="p-12 text-center">
                 <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">No prompts yet</p>
+                <p className="text-muted-foreground">
+                  {searchQuery ? "No prompts match your search" : "No prompts yet"}
+                </p>
               </div>
             )}
           </div>
@@ -207,49 +411,191 @@ export default function AdminDashboard() {
 
         {activeTab === "users" && (
           <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
-            <table className="w-full min-w-[400px]">
+            <table className="w-full min-w-[500px]">
               <thead>
                 <tr className="border-b border-border/50">
                   <th className="text-left p-4 font-semibold text-foreground text-sm">User</th>
                   <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Email</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Joined</th>
+                  <th className="text-left p-4 font-semibold text-foreground text-sm">Role</th>
+                  <th className="text-left p-4 font-semibold text-foreground text-sm hidden md:table-cell">Joined</th>
+                  <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((u, index) => (
-                  <tr 
-                    key={u.id} 
-                    className="border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up"
-                    style={{ animationDelay: `${index * 30}ms` }}
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold text-sm">
-                          {(u.display_name || u.email || "?")[0].toUpperCase()}
+                {filteredUsers.map((u, index) => {
+                  const isThisUserAdmin = isUserAdmin(u.id);
+                  const isCurrentUser = u.id === user?.id;
+                  
+                  return (
+                    <tr 
+                      key={u.id} 
+                      className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${
+                        isCurrentUser ? "bg-primary/5" : ""
+                      }`}
+                      style={{ animationDelay: `${index * 30}ms` }}
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
+                            isThisUserAdmin 
+                              ? "bg-gradient-to-br from-primary to-accent" 
+                              : "bg-muted-foreground/30"
+                          }`}>
+                            {(u.display_name || u.email || "?")[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground flex items-center gap-2">
+                              {u.display_name || "—"}
+                              {isCurrentUser && (
+                                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground sm:hidden">{u.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-foreground">{u.display_name || "—"}</p>
-                          <p className="text-xs text-muted-foreground sm:hidden">{u.email}</p>
+                      </td>
+                      <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{u.email}</td>
+                      <td className="p-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          isThisUserAdmin 
+                            ? "bg-primary/15 text-primary" 
+                            : "bg-muted text-muted-foreground"
+                        }`}>
+                          {isThisUserAdmin ? "Admin" : "User"}
+                        </span>
+                      </td>
+                      <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleAdminRole(u.id)}
+                            disabled={isCurrentUser}
+                            className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${
+                              isThisUserAdmin 
+                                ? "hover:bg-accent/10 text-accent" 
+                                : "hover:bg-primary/10 text-primary"
+                            }`}
+                            title={isThisUserAdmin ? "Remove admin" : "Make admin"}
+                          >
+                            <Crown className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">
+                              {isThisUserAdmin ? "Remove Admin" : "Make Admin"}
+                            </span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteUser(u.id)}
+                            disabled={isCurrentUser}
+                            className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive disabled:opacity-30"
+                            title="Delete user"
+                          >
+                            <UserX className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{u.email}</td>
-                    <td className="p-4 text-muted-foreground text-sm">
-                      {new Date(u.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-            {users.length === 0 && (
+            {filteredUsers.length === 0 && (
               <div className="p-12 text-center">
                 <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">No users yet</p>
+                <p className="text-muted-foreground">
+                  {searchQuery ? "No users match your search" : "No users yet"}
+                </p>
               </div>
             )}
           </div>
         )}
       </main>
+
+      {/* Add User Modal */}
+      <Dialog open={showAddUserModal} onOpenChange={setShowAddUserModal}>
+        <DialogContent className="glass-panel border-glass-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              Add New User
+            </DialogTitle>
+            <DialogDescription>
+              Create a new user account. They will receive a confirmation email.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={addNewUser} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newUserName">Display Name</Label>
+              <Input
+                id="newUserName"
+                type="text"
+                placeholder="John Doe"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                className="input-field"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newUserEmail">Email *</Label>
+              <Input
+                id="newUserEmail"
+                type="email"
+                placeholder="user@example.com"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                required
+                className="input-field"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newUserPassword">Password *</Label>
+              <Input
+                id="newUserPassword"
+                type="password"
+                placeholder="••••••••"
+                value={newUserPassword}
+                onChange={(e) => setNewUserPassword(e.target.value)}
+                required
+                minLength={6}
+                className="input-field"
+              />
+            </div>
+            
+            <DialogFooter className="gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddUserModal(false)}
+                className="glass-card"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isAddingUser}
+                className="btn-primary"
+              >
+                {isAddingUser ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creating...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Create User
+                  </span>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

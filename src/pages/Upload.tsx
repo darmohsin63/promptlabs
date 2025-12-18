@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 const Upload = () => {
   const navigate = useNavigate();
   const { addPrompt } = usePrompts();
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -23,14 +23,15 @@ const Upload = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && (!user || !isAdmin)) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to add prompts",
+        title: "Admin access required",
+        description: "Only admins can add prompts",
+        variant: "destructive",
       });
-      navigate("/auth");
+      navigate("/");
     }
-  }, [user, loading, navigate]);
+  }, [user, isAdmin, loading, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -107,18 +108,18 @@ const Upload = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container pt-24 pb-12 px-4 text-center">
           <div className="glass-panel max-w-md mx-auto">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Sign in required</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-4">Admin Access Required</h1>
             <p className="text-muted-foreground mb-8">
-              You need to sign in to add prompts.
+              Only administrators can add new prompts.
             </p>
-            <Link to="/auth" className="btn-primary">
-              Sign In
+            <Link to="/" className="btn-primary">
+              Go Home
             </Link>
           </div>
         </div>

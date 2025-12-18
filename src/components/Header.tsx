@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Plus, LogIn, LogOut, Menu, X } from "lucide-react";
+import { Sparkles, Plus, LogIn, LogOut, Menu, X, Shield } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Header() {
   const location = useLocation();
-  const { user, signOut, loading } = useAuth();
+  const { user, isAdmin, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -37,13 +37,24 @@ export function Header() {
             <>
               {user ? (
                 <>
-                  <Link
-                    to="/upload"
-                    className="btn-primary flex items-center gap-2 text-sm !py-2.5 !px-4"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Prompt
-                  </Link>
+                  {isAdmin && (
+                    <>
+                      <Link
+                        to="/upload"
+                        className="btn-primary flex items-center gap-2 text-sm !py-2.5 !px-4"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Prompt
+                      </Link>
+                      <Link
+                        to="/admin/dashboard"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                      >
+                        <Shield className="w-4 h-4" />
+                        Admin
+                      </Link>
+                    </>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -99,14 +110,26 @@ export function Header() {
               <>
                 {user ? (
                   <>
-                    <Link
-                      to="/upload"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Prompt
-                    </Link>
+                    {isAdmin && (
+                      <>
+                        <Link
+                          to="/upload"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add Prompt
+                        </Link>
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2"
+                        >
+                          <Shield className="w-4 h-4" />
+                          Admin Dashboard
+                        </Link>
+                      </>
+                    )}
                     <button
                       onClick={() => { signOut(); setMobileMenuOpen(false); }}
                       className="px-4 py-3 rounded-xl font-medium text-muted-foreground flex items-center gap-2 text-left"
