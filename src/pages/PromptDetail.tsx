@@ -1,8 +1,8 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, User, Copy, ExternalLink, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
-import { usePrompts } from "@/hooks/usePrompts";
+import { usePrompts, Prompt } from "@/hooks/usePrompts";
 import { toast } from "@/hooks/use-toast";
 
 const PromptDetail = () => {
@@ -10,8 +10,30 @@ const PromptDetail = () => {
   const navigate = useNavigate();
   const { getPromptById } = usePrompts();
   const [copied, setCopied] = useState(false);
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const prompt = getPromptById(id || "");
+  useEffect(() => {
+    const fetchPrompt = async () => {
+      if (!id) return;
+      setLoading(true);
+      const { data } = await getPromptById(id);
+      setPrompt(data);
+      setLoading(false);
+    };
+    fetchPrompt();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-16 text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!prompt) {
     return (
@@ -33,7 +55,7 @@ const PromptDetail = () => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(prompt.promptText);
+      await navigator.clipboard.writeText(prompt.content);
       setCopied(true);
       toast({
         title: "Copied!",
@@ -74,7 +96,7 @@ const PromptDetail = () => {
           {/* Image */}
           <div className="rounded-2xl overflow-hidden mb-8 animate-scale-in">
             <img
-              src={prompt.imageUrl}
+              src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
               alt={prompt.title}
               className="w-full aspect-video object-cover"
             />
@@ -94,7 +116,7 @@ const PromptDetail = () => {
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                {new Date(prompt.createdAt).toLocaleDateString("en-US", {
+                {new Date(prompt.created_at).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
@@ -114,7 +136,7 @@ const PromptDetail = () => {
                 </h2>
               </div>
               <div className="prompt-box">
-                <p className="text-foreground whitespace-pre-wrap">{prompt.promptText}</p>
+                <p className="text-foreground whitespace-pre-wrap">{prompt.content}</p>
               </div>
             </div>
 

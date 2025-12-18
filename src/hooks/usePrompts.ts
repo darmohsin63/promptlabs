@@ -1,36 +1,75 @@
 import { useState, useEffect } from "react";
-import { Prompt } from "@/types/prompt";
-import { samplePrompts } from "@/data/samplePrompts";
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "prompt-hub-prompts";
+export interface Prompt {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string;
+  image_url: string | null;
+  author: string;
+  created_at: string;
+  user_id: string;
+}
 
 export function usePrompts() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setPrompts(JSON.parse(stored));
-    } else {
-      setPrompts(samplePrompts);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(samplePrompts));
-    }
+    fetchPrompts();
   }, []);
 
-  const addPrompt = (newPrompt: Omit<Prompt, "id" | "createdAt">) => {
-    const prompt: Prompt = {
-      ...newPrompt,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    const updated = [prompt, ...prompts];
-    setPrompts(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  const fetchPrompts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("prompts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setPrompts(data);
+    }
+    setLoading(false);
   };
 
-  const getPromptById = (id: string) => {
-    return prompts.find((p) => p.id === id);
+  const addPrompt = async (
+    newPrompt: Omit<Prompt, "id" | "created_at" | "user_id">,
+    userId: string
+  ) => {
+    const { data, error } = await supabase
+      .from("prompts")
+      .insert({
+        ...newPrompt,
+        user_id: userId,
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setPrompts([data, ...prompts]);
+      return { data, error: null };
+    }
+    return { data: null, error };
   };
 
-  return { prompts, addPrompt, getPromptById };
+  const getPromptById = async (id: string) => {
+    const { data, error } = await supabase
+      .from("prompts")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    return { data, error };
+  };
+
+  const deletePrompt = async (id: string) => {
+    const { error } = await supabase.from("prompts").delete().eq("id", id);
+    if (!error) {
+      setPrompts(prompts.filter((p) => p.id !== id));
+    }
+    return { error };
+  };
+
+  return { prompts, loading, addPrompt, getPromptById, deletePrompt, refetch: fetchPrompts };
 }
