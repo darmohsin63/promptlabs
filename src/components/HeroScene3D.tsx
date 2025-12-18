@@ -4,9 +4,9 @@ import { Float, Sphere, MeshDistortMaterial, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { RobotAvatar } from "./RobotAvatar";
 
-// Social URLs - Update these with your actual profiles
-const FACEBOOK_URL = "https://facebook.com/yourprofile";
-const INSTAGRAM_URL = "https://instagram.com/yourprofile";
+// Social URLs
+const FACEBOOK_URL = "https://facebook.com/darmohasin13";
+const INSTAGRAM_URL = "https://instagram.com/darmohsin63";
 
 function AnimatedSphere({ position, color, speed = 1, distort = 0.4, size = 1 }: {
   position: [number, number, number];
