@@ -18,7 +18,10 @@ import {
   UserX,
   Search,
   Plus,
-  X
+  X,
+  MessageSquare,
+  Mail,
+  Check
 } from "lucide-react";
 import {
   Dialog,
@@ -49,6 +52,14 @@ interface UserRole {
   role: "admin" | "user";
 }
 
+interface Feedback {
+  id: string;
+  email: string;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+}
+
 export default function AdminDashboard() {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -56,7 +67,8 @@ export default function AdminDashboard() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [activeTab, setActiveTab] = useState<"prompts" | "users">("prompts");
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [activeTab, setActiveTab] = useState<"prompts" | "users" | "feedback">("prompts");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -77,15 +89,17 @@ export default function AdminDashboard() {
   }, [isAdmin]);
 
   const fetchData = async () => {
-    const [promptsRes, usersRes, rolesRes] = await Promise.all([
+    const [promptsRes, usersRes, rolesRes, feedbackRes] = await Promise.all([
       supabase.from("prompts").select("id, title, author, created_at").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, role"),
+      supabase.from("feedback").select("*").order("created_at", { ascending: false }),
     ]);
 
     if (promptsRes.data) setPrompts(promptsRes.data);
     if (usersRes.data) setUsers(usersRes.data);
     if (rolesRes.data) setUserRoles(rolesRes.data as UserRole[]);
+    if (feedbackRes.data) setFeedback(feedbackRes.data);
   };
 
   const deletePrompt = async (id: string) => {
@@ -220,6 +234,30 @@ export default function AdminDashboard() {
     (u.display_name || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredFeedback = feedback.filter(f =>
+    f.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.message.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const markAsRead = async (id: string) => {
+    const { error } = await supabase.from("feedback").update({ is_read: true }).eq("id", id);
+    if (!error) {
+      setFeedback(feedback.map(f => f.id === id ? { ...f, is_read: true } : f));
+    }
+  };
+
+  const deleteFeedback = async (id: string) => {
+    const { error } = await supabase.from("feedback").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Deleted", description: "Feedback removed." });
+      setFeedback(feedback.filter(f => f.id !== id));
+    }
+  };
+
+  const unreadCount = feedback.filter(f => !f.is_read).length;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -286,12 +324,17 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="glass-panel flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
-              <Users className="w-6 h-6 text-accent" />
+            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center relative">
+              <MessageSquare className="w-6 h-6 text-accent" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
             </div>
             <div>
-              <p className="text-2xl md:text-3xl font-bold text-foreground">{users.length - adminCount}</p>
-              <p className="text-sm text-muted-foreground">Regular Users</p>
+              <p className="text-2xl md:text-3xl font-bold text-foreground">{feedback.length}</p>
+              <p className="text-sm text-muted-foreground">Feedback</p>
             </div>
           </div>
         </div>
@@ -344,6 +387,23 @@ export default function AdminDashboard() {
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">Users</span>
             <span className="text-xs opacity-70">({users.length})</span>
+          </button>
+          <button
+            onClick={() => { setActiveTab("feedback"); setSearchQuery(""); }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 relative ${
+              activeTab === "feedback"
+                ? "btn-primary !py-2.5"
+                : "glass-card !rounded-xl text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="hidden sm:inline">Feedback</span>
+            <span className="text-xs opacity-70">({feedback.length})</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -508,6 +568,80 @@ export default function AdminDashboard() {
                 <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-muted-foreground">
                   {searchQuery ? "No users match your search" : "No users yet"}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "feedback" && (
+          <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
+            <table className="w-full min-w-[500px]">
+              <thead>
+                <tr className="border-b border-border/50">
+                  <th className="text-left p-4 font-semibold text-foreground text-sm">Email</th>
+                  <th className="text-left p-4 font-semibold text-foreground text-sm">Message</th>
+                  <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Date</th>
+                  <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredFeedback.map((f, index) => (
+                  <tr 
+                    key={f.id} 
+                    className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${
+                      !f.is_read ? "bg-primary/5" : ""
+                    }`}
+                    style={{ animationDelay: `${index * 30}ms` }}
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium text-foreground text-sm">{f.email}</span>
+                        {!f.is_read && (
+                          <span className="px-2 py-0.5 bg-primary/15 text-primary text-xs rounded-full">New</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-muted-foreground text-sm line-clamp-2 max-w-md">{f.message}</p>
+                    </td>
+                    <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">
+                      {new Date(f.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {!f.is_read && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => markAsRead(f.id)}
+                            className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10"
+                            title="Mark as read"
+                          >
+                            <Check className="w-4 h-4 text-primary" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteFeedback(f.id)}
+                          className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                          title="Delete feedback"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filteredFeedback.length === 0 && (
+              <div className="p-12 text-center">
+                <MessageSquare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground">
+                  {searchQuery ? "No feedback matches your search" : "No feedback yet"}
                 </p>
               </div>
             )}

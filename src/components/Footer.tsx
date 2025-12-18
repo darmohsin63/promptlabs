@@ -1,15 +1,63 @@
-import { Instagram, Facebook, Heart } from "lucide-react";
+import { useState } from "react";
+import { Instagram, Facebook, Heart, Send } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
 
 const FACEBOOK_URL = "https://facebook.com/darmohasin13";
 const INSTAGRAM_URL = "https://instagram.com/darmohsin63";
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim() || !message.trim()) {
+      toast({
+        title: "Missing fields",
+        description: "Please enter both email and message.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    const { error } = await supabase.from("feedback").insert({
+      email: email.trim(),
+      message: message.trim(),
+    });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Message sent!",
+        description: "Thank you for your feedback.",
+      });
+      setEmail("");
+      setMessage("");
+    }
+  };
+
   return (
     <footer className="border-t border-border/50 bg-background/80 backdrop-blur-sm">
       <div className="container py-12 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div>
             <Link to="/" className="inline-block mb-4 group">
@@ -94,6 +142,36 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
+          </div>
+
+          {/* Feedback Form */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4">Send us Feedback</h3>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <Input
+                type="email"
+                placeholder="Your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-secondary/30 border-border/50"
+              />
+              <Textarea
+                placeholder="Your suggestion or complaint..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={3}
+                className="bg-secondary/30 border-border/50 resize-none"
+              />
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full"
+                size="sm"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Sending..." : "Send"}
+              </Button>
+            </form>
           </div>
         </div>
 
