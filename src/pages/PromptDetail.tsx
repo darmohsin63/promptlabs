@@ -16,6 +16,10 @@ const PromptDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchPrompt = async () => {
       if (!id) return;
       setLoading(true);
@@ -98,11 +102,11 @@ const PromptDetail = () => {
 
         <div className="max-w-4xl mx-auto">
           {/* Image */}
-          <div className="glass-card overflow-hidden mb-8 animate-scale-in">
+          <div className="glass-card overflow-hidden mb-8 animate-scale-in flex justify-center">
             <img
               src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
               alt={prompt.title}
-              className="w-full aspect-video object-cover"
+              className="max-w-full h-auto max-h-[70vh] object-contain"
             />
           </div>
 
