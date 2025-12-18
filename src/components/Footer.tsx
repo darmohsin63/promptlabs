@@ -67,17 +67,29 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link 
+                  to="/terms" 
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link 
+                  to="/privacy" 
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link 
+                  to="/about" 
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   About Us
                 </Link>
               </li>
