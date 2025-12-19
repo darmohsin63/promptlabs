@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Instagram, Facebook, Heart, Send } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Instagram, Facebook, Heart, Send, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 import logo from "@/assets/logo.jpg";
 
@@ -14,12 +14,6 @@ const INSTAGRAM_URL = "https://instagram.com/darmohsin63";
 
 // Validation schema for feedback form
 const feedbackSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, "Email is required")
-    .max(255, "Email must be less than 255 characters")
-    .email("Please enter a valid email address"),
   message: z
     .string()
     .trim()
@@ -28,16 +22,48 @@ const feedbackSchema = z.object({
 });
 
 export function Footer() {
-  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("email, display_name")
+          .eq("id", user.id)
+          .single();
+        
+        if (data) {
+          setUserEmail(data.email);
+          setUserName(data.display_name);
+        }
+      } else {
+        setUserEmail(null);
+        setUserName(null);
+      }
+    };
+    fetchProfile();
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user || !userEmail) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to send feedback.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Validate input with zod
-    const validationResult = feedbackSchema.safeParse({ email, message });
+    const validationResult = feedbackSchema.safeParse({ message });
     
     if (!validationResult.success) {
       const firstError = validationResult.error.errors[0];
@@ -53,7 +79,7 @@ export function Footer() {
     setIsSubmitting(true);
     
     const { error } = await supabase.from("feedback").insert({
-      email: validatedData.email,
+      email: userEmail,
       message: validatedData.message,
     });
 
@@ -70,7 +96,6 @@ export function Footer() {
         title: "Message sent!",
         description: "Thank you for your feedback.",
       });
-      setEmail("");
       setMessage("");
     }
   };
@@ -167,34 +192,50 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Feedback Form */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Send us Feedback</h3>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <Input
-                type="email"
-                placeholder="Your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-secondary/30 border-border/50"
-              />
-              <Textarea
-                placeholder="Your suggestion or complaint..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={3}
-                className="bg-secondary/30 border-border/50 resize-none"
-              />
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full"
-                size="sm"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                {isSubmitting ? "Sending..." : "Send"}
-              </Button>
-            </form>
+          {/* Feedback Form - Glassmorphism Card */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 rounded-2xl blur-xl opacity-60" />
+            <div className="relative backdrop-blur-xl bg-background/40 border border-white/10 rounded-2xl p-5 shadow-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
+                  <MessageSquare className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground">Send Feedback</h3>
+              </div>
+              
+              {user ? (
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="text-xs text-muted-foreground mb-2 px-1">
+                    Sending as <span className="text-foreground font-medium">{userName || userEmail}</span>
+                  </div>
+                  <Textarea
+                    placeholder="Your suggestion or complaint..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={3}
+                    className="bg-background/50 border-white/10 resize-none focus:border-primary/50 transition-colors"
+                  />
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                    size="sm"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {isSubmitting ? "Sending..." : "Send Feedback"}
+                  </Button>
+                </form>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground mb-3">Sign in to send feedback</p>
+                  <Link to="/auth">
+                    <Button variant="outline" size="sm" className="border-white/10 hover:bg-white/5">
+                      Sign In
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
