@@ -43,6 +43,7 @@ interface Prompt {
   author: string;
   created_at: string;
   scheduled_at: string | null;
+  is_approved: boolean | null;
 }
 
 interface Profile {
@@ -56,7 +57,7 @@ interface Profile {
 
 interface UserRole {
   user_id: string;
-  role: "admin" | "user";
+  role: "admin" | "user" | "pro";
 }
 
 interface Feedback {
@@ -101,7 +102,7 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setDataLoading(true);
     const [promptsRes, usersRes, rolesRes, feedbackRes] = await Promise.all([
-      supabase.from("prompts").select("id, title, author, created_at, scheduled_at").order("created_at", { ascending: false }),
+      supabase.from("prompts").select("id, title, author, created_at, scheduled_at, is_approved").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, created_at, date_of_birth, avatar_url").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("feedback").select("*").order("created_at", { ascending: false }),
@@ -112,6 +113,58 @@ export default function AdminDashboard() {
     if (rolesRes.data) setUserRoles(rolesRes.data as UserRole[]);
     if (feedbackRes.data) setFeedback(feedbackRes.data);
     setDataLoading(false);
+  };
+
+  const approvePrompt = async (id: string) => {
+    const { error } = await supabase
+      .from("prompts")
+      .update({ 
+        is_approved: true, 
+        approved_at: new Date().toISOString(),
+        approved_by: user?.id 
+      })
+      .eq("id", id);
+    
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Approved", description: "Prompt is now visible to everyone." });
+      setPrompts(prompts.map(p => p.id === id ? { ...p, is_approved: true } : p));
+    }
+  };
+
+  const isUserPro = (userId: string) => {
+    return userRoles.some(r => r.user_id === userId && r.role === "pro");
+  };
+
+  const toggleProRole = async (userId: string) => {
+    const currentlyPro = isUserPro(userId);
+    
+    if (currentlyPro) {
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId)
+        .eq("role", "pro");
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Role updated", description: "Pro role removed." });
+        setUserRoles(userRoles.filter(r => !(r.user_id === userId && r.role === "pro")));
+      }
+    } else {
+      const { error } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: "pro" });
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Role updated", description: "User is now a Pro." });
+        setUserRoles([...userRoles, { user_id: userId, role: "pro" }]);
+      }
+    }
   };
 
   const deletePrompt = async (id: string) => {
@@ -267,6 +320,8 @@ export default function AdminDashboard() {
 
   const unreadCount = feedback.filter(f => !f.is_read).length;
   const scheduledCount = prompts.filter(p => p.scheduled_at && new Date(p.scheduled_at) > new Date()).length;
+  const pendingCount = prompts.filter(p => p.is_approved === false).length;
+  const proCount = userRoles.filter(r => r.role === "pro").length;
 
   if (loading) {
     return (
@@ -306,13 +361,13 @@ export default function AdminDashboard() {
 
         {/* Stats Cards */}
         {dataLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            {[1, 2, 3, 4, 5].map((i) => (
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <StatCardSkeleton key={i} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8 animate-fade-up stagger-1">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8 animate-fade-up stagger-1">
             <div className="glass-panel flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <FileText className="w-6 h-6 text-primary" />
@@ -323,8 +378,22 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="glass-panel flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center relative">
+                <Clock className="w-6 h-6 text-amber-500" />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {pendingCount}
+                  </span>
+                )}
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground">{pendingCount}</p>
+                <p className="text-sm text-muted-foreground">Pending</p>
+              </div>
+            </div>
+            <div className="glass-panel flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-accent" />
+                <Calendar className="w-6 h-6 text-accent" />
               </div>
               <div>
                 <p className="text-2xl md:text-3xl font-bold text-foreground">{scheduledCount}</p>
@@ -454,10 +523,11 @@ export default function AdminDashboard() {
                   <tbody>
                     {filteredPrompts.map((prompt, index) => {
                       const isScheduled = prompt.scheduled_at && new Date(prompt.scheduled_at) > new Date();
+                      const isPending = prompt.is_approved === false;
                       return (
                         <tr 
                           key={prompt.id} 
-                          className="border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up"
+                          className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${isPending ? 'bg-amber-500/5' : ''}`}
                           style={{ animationDelay: `${index * 30}ms` }}
                         >
                           <td className="p-4">
@@ -466,7 +536,12 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{prompt.author}</td>
                           <td className="p-4">
-                            {isScheduled ? (
+                            {isPending ? (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center gap-1 w-fit">
+                                <Clock className="w-3 h-3" />
+                                Pending
+                              </span>
+                            ) : isScheduled ? (
                               <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-accent/15 text-accent flex items-center gap-1 w-fit">
                                 <Clock className="w-3 h-3" />
                                 Scheduled
@@ -485,6 +560,17 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 text-right">
                             <div className="flex items-center justify-end gap-2">
+                              {isPending && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => approvePrompt(prompt.id)}
+                                  className="h-8 w-8 p-0 rounded-lg hover:bg-green-500/10 hover:text-green-600"
+                                  title="Approve"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"

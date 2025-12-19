@@ -70,6 +70,8 @@ export type Database = {
       }
       prompts: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           author: string
           content: string
           created_at: string | null
@@ -77,12 +79,15 @@ export type Database = {
           id: string
           image_url: string | null
           image_urls: string[] | null
+          is_approved: boolean | null
           scheduled_at: string | null
           title: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           author: string
           content: string
           created_at?: string | null
@@ -90,12 +95,15 @@ export type Database = {
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          is_approved?: boolean | null
           scheduled_at?: string | null
           title: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           author?: string
           content?: string
           created_at?: string | null
@@ -103,12 +111,42 @@ export type Database = {
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          is_approved?: boolean | null
           scheduled_at?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string
         }
         Relationships: []
+      }
+      saved_prompts: {
+        Row: {
+          created_at: string | null
+          id: string
+          prompt_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          prompt_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          prompt_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_prompts_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

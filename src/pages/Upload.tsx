@@ -15,7 +15,8 @@ const UploadPage = () => {
   const editId = searchParams.get("edit");
   
   const { addPrompt, updatePrompt, getPromptById } = usePrompts();
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, isPro, loading } = useAuth();
+  const canUpload = isAdmin || isPro;
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [formData, setFormData] = useState({
@@ -34,7 +35,7 @@ const UploadPage = () => {
 
   // Load existing prompt data if editing
   useEffect(() => {
-    if (editId && user && isAdmin) {
+    if (editId && user && canUpload) {
       setIsLoadingPrompt(true);
       getPromptById(editId).then(({ data }) => {
         if (data) {
@@ -53,18 +54,18 @@ const UploadPage = () => {
         setIsLoadingPrompt(false);
       });
     }
-  }, [editId, user, isAdmin, getPromptById]);
+  }, [editId, user, canUpload, getPromptById]);
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    if (!loading && (!user || !canUpload)) {
       toast({
-        title: "Admin access required",
-        description: "Only admins can add prompts",
+        title: "Access required",
+        description: "Only admins and Pro users can add prompts",
         variant: "destructive",
       });
       navigate("/");
     }
-  }, [user, isAdmin, loading, navigate]);
+  }, [user, canUpload, loading, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -170,6 +171,8 @@ const UploadPage = () => {
       author: formData.author,
       image_url: imageUrl,
       image_urls: imageUrls.length > 0 ? imageUrls : null,
+      // Admin prompts are auto-approved, Pro user prompts need approval
+      is_approved: isAdmin ? true : false,
     };
 
     // Add scheduled_at if provided
@@ -198,13 +201,18 @@ const UploadPage = () => {
       return;
     }
 
+    const isScheduled = !!formData.scheduled_at;
+    const needsApproval = !isAdmin;
+    
     toast({
-      title: editId ? "Prompt updated!" : formData.scheduled_at ? "Prompt scheduled!" : "Prompt added!",
+      title: editId ? "Prompt updated!" : isScheduled ? "Prompt scheduled!" : needsApproval ? "Prompt submitted!" : "Prompt added!",
       description: editId 
         ? "Your prompt has been updated successfully" 
-        : formData.scheduled_at 
+        : isScheduled 
           ? `Will be published on ${new Date(formData.scheduled_at).toLocaleDateString()}`
-          : "Your prompt has been published successfully",
+          : needsApproval
+            ? "Your prompt is pending admin approval"
+            : "Your prompt has been published successfully",
     });
 
     navigate("/");
@@ -221,15 +229,15 @@ const UploadPage = () => {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user || !canUpload) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container pt-24 pb-12 px-4 text-center">
           <div className="glass-panel max-w-md mx-auto">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Admin Access Required</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-4">Access Required</h1>
             <p className="text-muted-foreground mb-8">
-              Only administrators can add new prompts.
+              Only administrators and Pro users can add new prompts.
             </p>
             <Link to="/" className="btn-primary">
               Go Home
