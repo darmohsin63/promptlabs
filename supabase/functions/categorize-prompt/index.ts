@@ -26,11 +26,11 @@ serve(async (req) => {
   }
 
   try {
-    const { title, content, description } = await req.json();
+    const { title, content, description, imageUrls } = await req.json();
     
-    if (!content && !title) {
+    if (!content && !title && (!imageUrls || imageUrls.length === 0)) {
       return new Response(
-        JSON.stringify({ error: "Title or content is required" }),
+        JSON.stringify({ error: "Title, content, or images are required" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -44,13 +44,41 @@ serve(async (req) => {
       );
     }
 
-    const prompt = `Analyze this prompt and categorize it into 1-3 most relevant categories from this list: ${CATEGORIES.join(", ")}.
+    // Build the message content with images if available
+    const messageContent: any[] = [];
+    
+    // Add text prompt
+    const textPrompt = `Analyze this prompt and its images to categorize it into 1-3 most relevant categories from this list: ${CATEGORIES.join(", ")}.
 
 Title: ${title || "N/A"}
 Description: ${description || "N/A"}
 Content: ${content?.substring(0, 500) || "N/A"}
 
-Respond with ONLY the category names separated by commas (e.g., "Art & Design, Photography"). Choose 1-3 categories that best fit.`;
+IMPORTANT: If images are provided, analyze the IMAGE CONTENT to determine the category. For example:
+- Images of nature, landscapes, portraits → Photography
+- Images of artwork, illustrations, designs → Art & Design
+- Images of UI/app screenshots → Code & Development
+- Images of charts, presentations → Business & Marketing
+- Images of game screenshots → Gaming
+- Images of video thumbnails → Video & Animation
+
+Respond with ONLY the category names separated by commas (e.g., "Art & Design, Photography"). Choose 1-3 categories that best fit based primarily on the IMAGES if provided.`;
+
+    messageContent.push({ type: "text", text: textPrompt });
+
+    // Add images for vision analysis (limit to first 3 images)
+    if (imageUrls && imageUrls.length > 0) {
+      const imagesToAnalyze = imageUrls.slice(0, 3);
+      for (const imageUrl of imagesToAnalyze) {
+        if (imageUrl && typeof imageUrl === 'string') {
+          messageContent.push({
+            type: "image_url",
+            image_url: { url: imageUrl }
+          });
+        }
+      }
+      console.log(`Analyzing ${imagesToAnalyze.length} images for categorization`);
+    }
 
     console.log("Categorizing prompt:", title);
 
@@ -63,8 +91,8 @@ Respond with ONLY the category names separated by commas (e.g., "Art & Design, P
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a prompt categorization assistant. Respond with only category names separated by commas." },
-          { role: "user", content: prompt }
+          { role: "system", content: "You are a prompt categorization assistant. Analyze both text and images to determine the best categories. Respond with only category names separated by commas." },
+          { role: "user", content: messageContent }
         ],
       }),
     });

@@ -72,14 +72,14 @@ const UploadPage = () => {
     }
   }, [user, canUpload, loading, navigate]);
 
-  // Auto-categorize prompt using AI
-  const categorizePrompt = useCallback(async (title: string, content: string, description: string) => {
-    if (!content && !title) return;
+  // Auto-categorize prompt using AI (with image analysis)
+  const categorizePrompt = useCallback(async (title: string, content: string, description: string, imageUrls?: string[]) => {
+    if (!content && !title && (!imageUrls || imageUrls.length === 0)) return;
     
     setIsCategorizing(true);
     try {
       const { data, error } = await supabase.functions.invoke('categorize-prompt', {
-        body: { title, content, description }
+        body: { title, content, description, imageUrls }
       });
       
       if (!error && data?.categories) {
@@ -103,7 +103,7 @@ const UploadPage = () => {
       setSelectedFiles([]);
     }
 
-    // Trigger auto-categorization when content or title changes
+    // Trigger auto-categorization when content or title changes (include images)
     if ((name === "content" || name === "title") && formData.categories.length === 0) {
       if (categorizationTimeoutRef.current) {
         clearTimeout(categorizationTimeoutRef.current);
@@ -111,8 +111,8 @@ const UploadPage = () => {
       categorizationTimeoutRef.current = setTimeout(() => {
         const newTitle = name === "title" ? value : formData.title;
         const newContent = name === "content" ? value : formData.content;
-        if (newContent.length > 50 || newTitle.length > 10) {
-          categorizePrompt(newTitle, newContent, formData.description);
+        if (newContent.length > 50 || newTitle.length > 10 || previewImages.length > 0) {
+          categorizePrompt(newTitle, newContent, formData.description, previewImages);
         }
       }, 1500);
     }
@@ -160,6 +160,13 @@ const UploadPage = () => {
     if (newFiles.length > 0) {
       setSelectedFiles((prev) => [...prev, ...newFiles]);
       setFormData((prev) => ({ ...prev, image_url: "" }));
+      
+      // Trigger categorization when images are added (with delay to let previews load)
+      if (formData.categories.length === 0) {
+        setTimeout(() => {
+          categorizePrompt(formData.title, formData.content, formData.description, [...previewImages, ...newPreviews]);
+        }, 500);
+      }
     }
   };
 
