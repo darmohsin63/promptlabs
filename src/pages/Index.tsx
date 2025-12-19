@@ -2,6 +2,7 @@ import { Sparkles, Search } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { PromptCard } from "@/components/PromptCard";
+import { PromptCardSkeleton } from "@/components/PromptCardSkeleton";
 import { usePrompts } from "@/hooks/usePrompts";
 import { Footer } from "@/components/Footer";
 
@@ -9,12 +10,20 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { prompts, loading } = usePrompts();
 
-  const filteredPrompts = prompts.filter(
-    (prompt) =>
+  // Filter prompts - only show non-scheduled or past-scheduled prompts
+  const filteredPrompts = prompts.filter((prompt) => {
+    // Check if scheduled for future
+    const scheduledAt = (prompt as unknown as { scheduled_at?: string }).scheduled_at;
+    if (scheduledAt && new Date(scheduledAt) > new Date()) {
+      return false; // Hide future scheduled prompts
+    }
+
+    return (
       prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (prompt.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       prompt.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    );
+  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -59,16 +68,7 @@ const Index = () => {
             {/* Prompts Grid */}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="glass-card animate-pulse">
-                    <div className="aspect-[4/3] bg-muted" />
-                    <div className="p-5 space-y-3">
-                      <div className="h-5 bg-muted rounded-lg w-3/4" />
-                      <div className="h-4 bg-muted rounded-lg w-full" />
-                      <div className="h-4 bg-muted rounded-lg w-1/2" />
-                    </div>
-                  </div>
-                ))}
+                <PromptCardSkeleton count={6} />
               </div>
             ) : filteredPrompts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">

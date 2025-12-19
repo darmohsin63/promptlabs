@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { ImagePlus, Sparkles, Upload as UploadIcon, X } from "lucide-react";
+import { ImagePlus, Sparkles, Upload as UploadIcon, X, Calendar, Plus } from "lucide-react";
 import { Header } from "@/components/Header";
 import { usePrompts } from "@/hooks/usePrompts";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { uploadPromptImage } from "@/lib/uploadImage";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const UploadPage = () => {
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ const UploadPage = () => {
   
   const { addPrompt, updatePrompt, getPromptById } = usePrompts();
   const { user, isAdmin, loading } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -22,10 +24,11 @@ const UploadPage = () => {
     content: "",
     author: "",
     image_url: "",
+    scheduled_at: "",
   });
 
-  const [previewImage, setPreviewImage] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
 
@@ -41,9 +44,10 @@ const UploadPage = () => {
             content: data.content,
             author: data.author,
             image_url: data.image_url || "",
+            scheduled_at: "",
           });
           if (data.image_url) {
-            setPreviewImage(data.image_url);
+            setPreviewImages([data.image_url]);
           }
         }
         setIsLoadingPrompt(false);
@@ -69,18 +73,23 @@ const UploadPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "image_url" && value) {
-      setPreviewImage(value);
-      setSelectedFile(null);
+      setPreviewImages([value]);
+      setSelectedFiles([]);
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles: File[] = [];
+    const newPreviews: string[] = [];
+
+    Array.from(files).forEach((file) => {
       if (!file.type.startsWith("image/")) {
         toast({
           title: "Invalid file type",
-          description: "Please select an image file",
+          description: "Please select image files only",
           variant: "destructive",
         });
         return;
@@ -89,31 +98,34 @@ const UploadPage = () => {
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "File too large",
-          description: "Please select an image under 5MB",
+          description: `${file.name} is over 5MB limit`,
           variant: "destructive",
         });
         return;
       }
 
-      setSelectedFile(file);
-      setFormData((prev) => ({ ...prev, image_url: "" }));
+      newFiles.push(file);
       
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPreviewImage(e.target?.result as string);
+        newPreviews.push(e.target?.result as string);
+        if (newPreviews.length === newFiles.length) {
+          setPreviewImages((prev) => [...prev, ...newPreviews]);
+        }
       };
       reader.readAsDataURL(file);
+    });
+
+    if (newFiles.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...newFiles]);
+      setFormData((prev) => ({ ...prev, image_url: "" }));
     }
   };
 
-  const clearImage = () => {
-    setSelectedFile(null);
-    setPreviewImage("");
-    setFormData((prev) => ({ ...prev, image_url: "" }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const removeImage = (index: number) => {
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -140,38 +152,38 @@ const UploadPage = () => {
     setIsSubmitting(true);
 
     let imageUrl = formData.image_url || null;
+    const imageUrls: string[] = [];
 
-    // Upload file if selected
-    if (selectedFile) {
-      const uploadedUrl = await uploadPromptImage(selectedFile, user.id);
+    // Upload all selected files
+    for (const file of selectedFiles) {
+      const uploadedUrl = await uploadPromptImage(file, user.id);
       if (uploadedUrl) {
-        imageUrl = uploadedUrl;
-      } else {
-        toast({
-          title: "Image upload failed",
-          description: "Failed to upload image, but you can still save the prompt",
-          variant: "destructive",
-        });
+        imageUrls.push(uploadedUrl);
+        if (!imageUrl) imageUrl = uploadedUrl; // Set first as main image
       }
     }
 
-    const promptData = {
+    const promptData: Record<string, unknown> = {
       title: formData.title,
       description: formData.description || formData.title,
       content: formData.content,
       author: formData.author,
       image_url: imageUrl,
+      image_urls: imageUrls.length > 0 ? imageUrls : null,
     };
+
+    // Add scheduled_at if provided
+    if (formData.scheduled_at) {
+      promptData.scheduled_at = new Date(formData.scheduled_at).toISOString();
+    }
 
     let error;
     
     if (editId) {
-      // Update existing prompt
-      const result = await updatePrompt(editId, promptData);
+      const result = await updatePrompt(editId, promptData as Parameters<typeof updatePrompt>[1]);
       error = result.error;
     } else {
-      // Create new prompt
-      const result = await addPrompt(promptData, user.id);
+      const result = await addPrompt(promptData as Parameters<typeof addPrompt>[0], user.id);
       error = result.error;
     }
 
@@ -187,10 +199,12 @@ const UploadPage = () => {
     }
 
     toast({
-      title: editId ? "Prompt updated!" : "Prompt added!",
+      title: editId ? "Prompt updated!" : formData.scheduled_at ? "Prompt scheduled!" : "Prompt added!",
       description: editId 
         ? "Your prompt has been updated successfully" 
-        : "Your prompt has been published successfully",
+        : formData.scheduled_at 
+          ? `Will be published on ${new Date(formData.scheduled_at).toLocaleDateString()}`
+          : "Your prompt has been published successfully",
     });
 
     navigate("/");
@@ -247,58 +261,78 @@ const UploadPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 animate-fade-up stagger-1">
-            {/* Image Preview */}
+            {/* Image Gallery Preview */}
             <div className="glass-panel !p-0 overflow-hidden">
-              <div className="relative aspect-video flex items-center justify-center bg-muted/30">
-                {previewImage ? (
-                  <>
-                    <img
-                      src={previewImage}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={() => setPreviewImage("")}
-                    />
-                    <button
-                      type="button"
-                      onClick={clearImage}
-                      className="absolute top-2 right-2 p-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </>
-                ) : (
+              {previewImages.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-4">
+                  {previewImages.map((img, index) => (
+                    <div key={index} className="relative aspect-video rounded-xl overflow-hidden group">
+                      <img
+                        src={img}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={() => {
+                          setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-primary text-primary-foreground text-xs rounded-full">
+                          Main
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                  {/* Add more button */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRefs.current[0]?.click()}
+                    className="aspect-video rounded-xl border-2 border-dashed border-border/50 flex items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                  >
+                    <Plus className="w-8 h-8" />
+                  </button>
+                </div>
+              ) : (
+                <div className="relative aspect-video flex items-center justify-center bg-muted/30">
                   <div className="text-center text-muted-foreground p-8">
                     <ImagePlus className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">Upload an image or enter a URL</p>
+                    <p className="text-sm">Upload images or enter a URL</p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Image Upload Options */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Upload Image
+                  Upload Images (multiple allowed)
                 </label>
                 <div className="flex items-center gap-3">
                   <input
-                    ref={fileInputRef}
+                    ref={(el) => (fileInputRefs.current[0] = el)}
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleFileSelect}
                     className="hidden"
                   />
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => fileInputRefs.current[0]?.click()}
                     className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
                   >
                     <UploadIcon className="w-4 h-4" />
-                    Choose File
+                    Choose Files
                   </button>
                   <span className="text-sm text-muted-foreground">
-                    {selectedFile ? selectedFile.name : "No file chosen"}
+                    {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : "No files chosen"}
                   </span>
                 </div>
               </div>
@@ -322,7 +356,7 @@ const UploadPage = () => {
                   onChange={handleChange}
                   placeholder="https://example.com/image.jpg"
                   className="input-field"
-                  disabled={!!selectedFile}
+                  disabled={selectedFiles.length > 0}
                 />
               </div>
             </div>
@@ -394,6 +428,26 @@ const UploadPage = () => {
               />
             </div>
 
+            {/* Scheduled Publishing */}
+            <div className="glass-card p-4 !rounded-2xl border border-primary/20">
+              <Label htmlFor="scheduled_at" className="flex items-center gap-2 text-sm font-medium mb-3">
+                <Calendar className="w-4 h-4 text-primary" />
+                Schedule Publishing (Optional)
+              </Label>
+              <Input
+                type="datetime-local"
+                id="scheduled_at"
+                name="scheduled_at"
+                value={formData.scheduled_at}
+                onChange={handleChange}
+                className="input-field"
+                min={new Date().toISOString().slice(0, 16)}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Leave empty to publish immediately
+              </p>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -408,7 +462,7 @@ const UploadPage = () => {
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  {editId ? "Update Prompt" : "Publish Prompt"}
+                  {editId ? "Update Prompt" : formData.scheduled_at ? "Schedule Prompt" : "Publish Prompt"}
                 </>
               )}
             </button>

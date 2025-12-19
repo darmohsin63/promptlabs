@@ -497,4 +497,11 @@
     perspective: 1000px;
     transform-style: preserve-3d;
   }
+
+  /* Shimmer animation for skeletons */
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
