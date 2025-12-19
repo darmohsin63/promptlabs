@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { usePrompts, Prompt } from "@/hooks/usePrompts";
 import { useAuth } from "@/hooks/useAuth";
+import { Link as RouterLink } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
 const PromptDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getPromptById } = usePrompts();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [prompt, setPrompt] = useState<Prompt | null>(null);
   const [loading, setLoading] = useState(true);
@@ -145,42 +146,56 @@ const PromptDetail = () => {
                   Prompt
                 </h2>
               </div>
-              <div className="glass-panel !p-5 md:!p-6">
-                <p className="text-foreground whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                  {prompt.content}
-                </p>
-              </div>
+              {user ? (
+                <div className="glass-panel !p-5 md:!p-6">
+                  <p className="text-foreground whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                    {prompt.content}
+                  </p>
+                </div>
+              ) : (
+                <div className="glass-panel !p-8 text-center">
+                  <p className="text-muted-foreground mb-4">Sign in to view this prompt</p>
+                  <RouterLink 
+                    to="/auth" 
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    Sign In to View
+                  </RouterLink>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 animate-fade-up stagger-3">
-              <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none">
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    Copy Prompt
-                  </>
+            {user ? (
+              <div className="flex flex-col sm:flex-row gap-3 animate-fade-up stagger-3">
+                <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copy Prompt
+                    </>
+                  )}
+                </button>
+                <button onClick={handleTry} className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                  <ExternalLink className="w-4 h-4" />
+                  Try This Prompt
+                </button>
+                {isAdmin && (
+                  <Link 
+                    to={`/upload?edit=${prompt.id}`} 
+                    className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit Prompt
+                  </Link>
                 )}
-              </button>
-              <button onClick={handleTry} className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none">
-                <ExternalLink className="w-4 h-4" />
-                Try This Prompt
-              </button>
-              {isAdmin && (
-                <Link 
-                  to={`/upload?edit=${prompt.id}`} 
-                  className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Edit Prompt
-                </Link>
-              )}
-            </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </main>

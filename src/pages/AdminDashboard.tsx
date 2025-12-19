@@ -672,13 +672,20 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{u.email}</td>
                           <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              isThisUserAdmin 
-                                ? "bg-primary/15 text-primary" 
-                                : "bg-muted text-muted-foreground"
-                            }`}>
-                              {isThisUserAdmin ? "Admin" : "User"}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                isThisUserAdmin 
+                                  ? "bg-primary/15 text-primary" 
+                                  : "bg-muted text-muted-foreground"
+                              }`}>
+                                {isThisUserAdmin ? "Admin" : "User"}
+                              </span>
+                              {isUserPro(u.id) && (
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-accent/15 text-accent">
+                                  Pro
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
                             {new Date(u.created_at).toLocaleDateString()}
@@ -709,6 +716,22 @@ export default function AdminDashboard() {
                                 <Crown className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">
                                   {isThisUserAdmin ? "Remove" : "Admin"}
+                                </span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleProRole(u.id)}
+                                className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${
+                                  isUserPro(u.id) 
+                                    ? "hover:bg-amber-500/10 text-amber-500" 
+                                    : "hover:bg-amber-500/10 text-muted-foreground"
+                                }`}
+                                title={isUserPro(u.id) ? "Remove Pro" : "Make Pro"}
+                              >
+                                <Crown className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">
+                                  {isUserPro(u.id) ? "Unpro" : "Pro"}
                                 </span>
                               </Button>
                               <Button
