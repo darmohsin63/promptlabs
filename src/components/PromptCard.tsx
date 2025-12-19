@@ -30,7 +30,7 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
   return (
     <Link
       to={`/prompt/${prompt.id}`}
-      className="prompt-card group block animate-fade-up glow-border"
+      className="prompt-card group block animate-fade-up glow-border opacity-0"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <div className="overflow-hidden relative bg-secondary/30 aspect-[4/5]">
