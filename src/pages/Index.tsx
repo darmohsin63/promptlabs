@@ -36,19 +36,6 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="flex-1 pt-20">
-        {/* Featured Carousel Section */}
-        {!featuredLoading && hasFeaturedContent && (
-          <section className="py-4 md:py-6">
-            <div className="container px-4">
-              <FeaturedCarousel
-                promptOfDay={promptOfDay}
-                trending={trending}
-                creatorsChoice={creatorsChoice}
-              />
-            </div>
-          </section>
-        )}
-
         {/* Search & Title Section */}
         <section className="py-8 md:py-12">
           <div className="container px-4">
@@ -72,6 +59,17 @@ const Index = () => {
                 />
               </div>
             </div>
+
+            {/* Featured Carousel Section - Below Search */}
+            {!featuredLoading && hasFeaturedContent && (
+              <div className="mb-8">
+                <FeaturedCarousel
+                  promptOfDay={promptOfDay}
+                  trending={trending}
+                  creatorsChoice={creatorsChoice}
+                />
+              </div>
+            )}
 
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8 px-1">
