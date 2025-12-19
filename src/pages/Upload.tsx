@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { ImagePlus, Sparkles, Upload as UploadIcon, X, Calendar, Plus } from "lucide-react";
+import { ImagePlus, Sparkles, Upload as UploadIcon, X, Calendar, Plus, Tag, Loader2 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { usePrompts } from "@/hooks/usePrompts";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { uploadPromptImage } from "@/lib/uploadImage";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 const UploadPage = () => {
   const navigate = useNavigate();
@@ -26,12 +27,15 @@ const UploadPage = () => {
     author: "",
     image_url: "",
     scheduled_at: "",
+    category: "",
   });
 
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
+  const [isCategorizing, setIsCategorizing] = useState(false);
+  const categorizationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load existing prompt data if editing
   useEffect(() => {
@@ -46,6 +50,7 @@ const UploadPage = () => {
             author: data.author,
             image_url: data.image_url || "",
             scheduled_at: "",
+            category: data.category || "",
           });
           if (data.image_url) {
             setPreviewImages([data.image_url]);
@@ -67,6 +72,26 @@ const UploadPage = () => {
     }
   }, [user, canUpload, loading, navigate]);
 
+  // Auto-categorize prompt using AI
+  const categorizePrompt = useCallback(async (title: string, content: string, description: string) => {
+    if (!content && !title) return;
+    
+    setIsCategorizing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('categorize-prompt', {
+        body: { title, content, description }
+      });
+      
+      if (!error && data?.category) {
+        setFormData(prev => ({ ...prev, category: data.category }));
+      }
+    } catch (err) {
+      console.error("Categorization error:", err);
+    } finally {
+      setIsCategorizing(false);
+    }
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -76,6 +101,20 @@ const UploadPage = () => {
     if (name === "image_url" && value) {
       setPreviewImages([value]);
       setSelectedFiles([]);
+    }
+
+    // Trigger auto-categorization when content or title changes
+    if ((name === "content" || name === "title") && !formData.category) {
+      if (categorizationTimeoutRef.current) {
+        clearTimeout(categorizationTimeoutRef.current);
+      }
+      categorizationTimeoutRef.current = setTimeout(() => {
+        const newTitle = name === "title" ? value : formData.title;
+        const newContent = name === "content" ? value : formData.content;
+        if (newContent.length > 50 || newTitle.length > 10) {
+          categorizePrompt(newTitle, newContent, formData.description);
+        }
+      }, 1500);
     }
   };
 
@@ -214,6 +253,7 @@ const UploadPage = () => {
       author: formData.author,
       image_url: imageUrl,
       image_urls: imageUrls.length > 0 ? imageUrls : null,
+      category: formData.category || null,
       // Admin prompts are auto-approved, Pro user prompts need approval
       is_approved: isAdmin ? true : false,
     };
@@ -485,6 +525,39 @@ const UploadPage = () => {
                 required
                 maxLength={100}
               />
+            </div>
+
+            {/* Category (AI Generated) */}
+            <div className="glass-card p-4 !rounded-2xl border border-accent/20">
+              <Label className="flex items-center gap-2 text-sm font-medium mb-3">
+                <Tag className="w-4 h-4 text-accent" />
+                Category
+                {isCategorizing && (
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Auto-detecting...
+                  </span>
+                )}
+              </Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  placeholder="Will be auto-detected by AI..."
+                  className="input-field flex-1"
+                />
+                {formData.category && (
+                  <span className="px-3 py-1.5 bg-accent/20 text-accent-foreground text-sm rounded-full whitespace-nowrap">
+                    {formData.category}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                AI will auto-detect category when you enter prompt content, or you can set it manually
+              </p>
             </div>
 
             {/* Scheduled Publishing */}

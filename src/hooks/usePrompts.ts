@@ -16,6 +16,7 @@ export interface Prompt {
   approved_at: string | null;
   approved_by: string | null;
   updated_at: string | null;
+  category: string | null;
 }
 
 export function usePrompts() {

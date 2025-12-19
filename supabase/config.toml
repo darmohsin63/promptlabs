@@ -1,1 +1,4 @@
 project_id = "qwsezjmyuzfawszsijyq"
+
+[functions.categorize-prompt]
+verify_jwt = false
