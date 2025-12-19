@@ -18,7 +18,10 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
         <img
           src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
           alt={prompt.title}
-          loading="lazy"
+          width={400}
+          height={500}
+          loading={index < 2 ? "eager" : "lazy"}
+          fetchPriority={index === 0 ? "high" : undefined}
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
