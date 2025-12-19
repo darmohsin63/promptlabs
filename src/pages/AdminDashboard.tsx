@@ -16,6 +16,7 @@ import {
   Eye, 
   UserPlus, 
   Crown,
+  Star,
   UserX,
   Search,
   Plus,
@@ -724,12 +725,12 @@ export default function AdminDashboard() {
                                 onClick={() => toggleProRole(u.id)}
                                 className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${
                                   isUserPro(u.id) 
-                                    ? "hover:bg-amber-500/10 text-amber-500" 
-                                    : "hover:bg-amber-500/10 text-muted-foreground"
+                                    ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20" 
+                                    : "hover:bg-amber-500/10 text-muted-foreground hover:text-amber-500"
                                 }`}
                                 title={isUserPro(u.id) ? "Remove Pro" : "Make Pro"}
                               >
-                                <Crown className="w-3.5 h-3.5" />
+                                <Star className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">
                                   {isUserPro(u.id) ? "Unpro" : "Pro"}
                                 </span>
