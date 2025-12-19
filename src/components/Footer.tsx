@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 
 const FACEBOOK_URL = "https://facebook.com/darmohasin13";
 const INSTAGRAM_URL = "https://instagram.com/darmohsin63";
@@ -112,7 +112,7 @@ export function Footer() {
                 alt="PromptHub" 
                 width={140}
                 height={48}
-                className="h-12 w-auto rounded-xl object-cover transition-all duration-300 group-hover:scale-105" 
+                className="h-12 w-auto object-cover transition-all duration-300 group-hover:scale-105" 
               />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mb-6">
