@@ -4,11 +4,14 @@ import { Header } from "@/components/Header";
 import { PromptCard } from "@/components/PromptCard";
 import { PromptCardSkeleton } from "@/components/PromptCardSkeleton";
 import { usePrompts } from "@/hooks/usePrompts";
+import { useFeaturedPrompts } from "@/hooks/useFeaturedPrompts";
+import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { prompts, loading } = usePrompts();
+  const { promptOfDay, trending, creatorsChoice, loading: featuredLoading } = useFeaturedPrompts();
 
   // Filter prompts - only show non-scheduled or past-scheduled prompts
   const filteredPrompts = prompts.filter((prompt) => {
@@ -25,12 +28,27 @@ const Index = () => {
     );
   });
 
+  const hasFeaturedContent = promptOfDay.length > 0 || trending.length > 0 || creatorsChoice.length > 0;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
       {/* Main Content */}
       <main className="flex-1 pt-20">
+        {/* Featured Carousel Section */}
+        {!featuredLoading && hasFeaturedContent && (
+          <section className="py-4 md:py-6">
+            <div className="container px-4">
+              <FeaturedCarousel
+                promptOfDay={promptOfDay}
+                trending={trending}
+                creatorsChoice={creatorsChoice}
+              />
+            </div>
+          </section>
+        )}
+
         {/* Search & Title Section */}
         <section className="py-8 md:py-12">
           <div className="container px-4">

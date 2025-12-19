@@ -17,6 +17,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminPrompts = lazy(() => import("./pages/admin/AdminPrompts"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminFeedback = lazy(() => import("./pages/admin/AdminFeedback"));
+const AdminFeatured = lazy(() => import("./pages/admin/AdminFeatured"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const About = lazy(() => import("./pages/About"));
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/admin/prompts" element={<AdminPrompts />} />
                 <Route path="/admin/users" element={<AdminUsers />} />
                 <Route path="/admin/feedback" element={<AdminFeedback />} />
+                <Route path="/admin/featured" element={<AdminFeatured />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/about" element={<About />} />
