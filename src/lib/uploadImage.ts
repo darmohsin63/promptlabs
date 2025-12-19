@@ -7,7 +7,7 @@ export async function uploadPromptImage(file: File, userId: string): Promise<str
   const { error } = await supabase.storage
     .from('prompt-images')
     .upload(fileName, file, {
-      cacheControl: '3600',
+      cacheControl: '31536000',
       upsert: false,
     });
 
