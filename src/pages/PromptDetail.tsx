@@ -1,9 +1,10 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, User, Copy, ExternalLink, Check, Pencil, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, User, Copy, Check, Pencil, Tag, Bookmark } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { usePrompts, Prompt } from "@/hooks/usePrompts";
 import { useAuth } from "@/hooks/useAuth";
+import { useSavedPrompts } from "@/hooks/useSavedPrompts";
 import { Link as RouterLink } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
@@ -12,9 +13,13 @@ const PromptDetail = () => {
   const navigate = useNavigate();
   const { getPromptById } = usePrompts();
   const { isAdmin, user } = useAuth();
+  const { isSaved, toggleSave } = useSavedPrompts();
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [prompt, setPrompt] = useState<Prompt | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const saved = id ? isSaved(id) : false;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -67,7 +72,6 @@ const PromptDetail = () => {
       await navigator.clipboard.writeText(prompt.content);
       setCopied(true);
       
-      // Haptic feedback for mobile devices
       if (navigator.vibrate) {
         navigator.vibrate(50);
       }
@@ -86,11 +90,29 @@ const PromptDetail = () => {
     }
   };
 
-  const handleTry = () => {
-    toast({
-      title: "Opening AI Tool",
-      description: "Redirecting to try this prompt...",
-    });
+  const handleSave = async () => {
+    if (!id) return;
+    setSaving(true);
+    
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    
+    const { error } = await toggleSave(id);
+    setSaving(false);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: saved ? "Removed from saved" : "Saved!",
+        description: saved ? "Prompt removed from your collection" : "Prompt added to your collection",
+      });
+    }
   };
 
   return (
@@ -196,9 +218,22 @@ const PromptDetail = () => {
                     </>
                   )}
                 </button>
-                <button onClick={handleTry} className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none">
-                  <ExternalLink className="w-4 h-4" />
-                  Try This Prompt
+                <button 
+                  onClick={handleSave} 
+                  disabled={saving}
+                  className={`btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none transition-all duration-200 ${saved ? 'bg-green-600 hover:bg-green-600 text-white border-green-600' : ''}`}
+                >
+                  {saved ? (
+                    <>
+                      <Bookmark className="w-4 h-4 fill-current animate-scale-in" />
+                      <span className="animate-fade-in">Saved ✓</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark className={`w-4 h-4 ${saving ? 'animate-pulse' : ''}`} />
+                      {saving ? 'Saving...' : 'Save Prompt'}
+                    </>
+                  )}
                 </button>
                 {isAdmin && (
                   <Link 
