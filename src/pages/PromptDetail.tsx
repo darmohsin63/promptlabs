@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, User, Copy, ExternalLink, Check, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, User, Copy, ExternalLink, Check, Pencil, Tag } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { usePrompts, Prompt } from "@/hooks/usePrompts";
@@ -66,6 +66,12 @@ const PromptDetail = () => {
     try {
       await navigator.clipboard.writeText(prompt.content);
       setCopied(true);
+      
+      // Haptic feedback for mobile devices
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
       toast({
         title: "Copied!",
         description: "Prompt copied to clipboard",
@@ -123,6 +129,12 @@ const PromptDetail = () => {
                 <User className="w-3.5 h-3.5" />
                 {prompt.author}
               </span>
+              {prompt.category && (
+                <span className="flex items-center gap-1.5 glass-card !rounded-full px-3 py-1.5 !bg-accent/20 text-accent-foreground">
+                  <Tag className="w-3.5 h-3.5" />
+                  {prompt.category}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 {new Date(prompt.created_at).toLocaleDateString("en-US", {
@@ -168,15 +180,18 @@ const PromptDetail = () => {
             {/* Action Buttons */}
             {user ? (
               <div className="flex flex-col sm:flex-row gap-3 animate-fade-up stagger-3">
-                <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                <button 
+                  onClick={handleCopy} 
+                  className={`btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none transition-all duration-200 ${copied ? 'bg-green-600 hover:bg-green-600' : ''}`}
+                >
                   {copied ? (
                     <>
-                      <Check className="w-4 h-4" />
-                      Copied!
+                      <Check className="w-4 h-4 animate-scale-in" />
+                      <span className="animate-fade-in">Copied ✓</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-4 h-4 transition-transform group-hover:scale-110" />
                       Copy Prompt
                     </>
                   )}

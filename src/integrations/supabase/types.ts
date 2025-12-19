@@ -73,6 +73,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           author: string
+          category: string | null
           content: string
           created_at: string | null
           description: string | null
@@ -89,6 +90,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           author: string
+          category?: string | null
           content: string
           created_at?: string | null
           description?: string | null
@@ -105,6 +107,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           author?: string
+          category?: string | null
           content?: string
           created_at?: string | null
           description?: string | null
