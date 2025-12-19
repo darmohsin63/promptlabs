@@ -39,18 +39,18 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ category: "Other" }),
+        JSON.stringify({ categories: ["Other"] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const prompt = `Analyze this prompt and categorize it into exactly ONE of these categories: ${CATEGORIES.join(", ")}.
+    const prompt = `Analyze this prompt and categorize it into 1-3 most relevant categories from this list: ${CATEGORIES.join(", ")}.
 
 Title: ${title || "N/A"}
 Description: ${description || "N/A"}
 Content: ${content?.substring(0, 500) || "N/A"}
 
-Respond with ONLY the category name, nothing else.`;
+Respond with ONLY the category names separated by commas (e.g., "Art & Design, Photography"). Choose 1-3 categories that best fit.`;
 
     console.log("Categorizing prompt:", title);
 
@@ -63,7 +63,7 @@ Respond with ONLY the category name, nothing else.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a prompt categorization assistant. Respond with only the category name." },
+          { role: "system", content: "You are a prompt categorization assistant. Respond with only category names separated by commas." },
           { role: "user", content: prompt }
         ],
       }),
@@ -72,32 +72,48 @@ Respond with ONLY the category name, nothing else.`;
     if (!response.ok) {
       console.error("AI gateway error:", response.status);
       return new Response(
-        JSON.stringify({ category: "Other" }),
+        JSON.stringify({ categories: ["Other"] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    let category = data.choices?.[0]?.message?.content?.trim() || "Other";
+    const rawCategories = data.choices?.[0]?.message?.content?.trim() || "Other";
     
-    // Validate category is in our list
-    if (!CATEGORIES.includes(category)) {
-      // Try to find a close match
-      const lowerCategory = category.toLowerCase();
-      const match = CATEGORIES.find(c => lowerCategory.includes(c.toLowerCase()) || c.toLowerCase().includes(lowerCategory));
-      category = match || "Other";
-    }
+    // Parse and validate categories
+    const parsedCategories = rawCategories
+      .split(",")
+      .map((c: string) => c.trim())
+      .filter((c: string) => {
+        if (CATEGORIES.includes(c)) return true;
+        // Try to find a close match
+        const match = CATEGORIES.find(cat => 
+          c.toLowerCase().includes(cat.toLowerCase()) || 
+          cat.toLowerCase().includes(c.toLowerCase())
+        );
+        return !!match;
+      })
+      .map((c: string) => {
+        if (CATEGORIES.includes(c)) return c;
+        return CATEGORIES.find(cat => 
+          c.toLowerCase().includes(cat.toLowerCase()) || 
+          cat.toLowerCase().includes(c.toLowerCase())
+        ) || c;
+      })
+      .slice(0, 3); // Max 3 categories
 
-    console.log("Categorized as:", category);
+    const categories = parsedCategories.length > 0 ? parsedCategories : ["Other"];
+
+    console.log("Categorized as:", categories);
 
     return new Response(
-      JSON.stringify({ category }),
+      JSON.stringify({ categories }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error("Error categorizing prompt:", error);
     return new Response(
-      JSON.stringify({ category: "Other" }),
+      JSON.stringify({ categories: ["Other"] }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
