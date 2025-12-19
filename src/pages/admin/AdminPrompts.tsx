@@ -16,7 +16,7 @@ interface Prompt {
   created_at: string;
   scheduled_at: string | null;
   is_approved: boolean | null;
-  category: string | null;
+  category: string[] | null;
 }
 
 export default function AdminPrompts() {
@@ -71,7 +71,7 @@ export default function AdminPrompts() {
     }
   };
 
-  const uncategorizedCount = prompts.filter(p => !p.category).length;
+  const uncategorizedCount = prompts.filter(p => !p.category || p.category.length === 0).length;
 
   const approvePrompt = async (id: string) => {
     const { error } = await supabase

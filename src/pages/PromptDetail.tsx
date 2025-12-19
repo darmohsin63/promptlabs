@@ -151,12 +151,12 @@ const PromptDetail = () => {
                 <User className="w-3.5 h-3.5" />
                 {prompt.author}
               </span>
-              {prompt.category && (
-                <span className="flex items-center gap-1.5 glass-card !rounded-full px-3 py-1.5 !bg-accent/20 text-accent-foreground">
+              {prompt.category && prompt.category.length > 0 && prompt.category.map((cat, index) => (
+                <span key={index} className="flex items-center gap-1.5 glass-card !rounded-full px-3 py-1.5 !bg-accent/20 text-accent-foreground">
                   <Tag className="w-3.5 h-3.5" />
-                  {prompt.category}
+                  {cat}
                 </span>
-              )}
+              ))}
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 {new Date(prompt.created_at).toLocaleDateString("en-US", {

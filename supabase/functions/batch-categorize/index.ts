@@ -37,11 +37,11 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch prompts without category
+    // Fetch prompts without category (null or empty array)
     const { data: prompts, error: fetchError } = await supabase
       .from('prompts')
       .select('id, title, content, description')
-      .is('category', null)
+      .or('category.is.null,category.eq.{}')
       .limit(50);
 
     if (fetchError) {
@@ -64,13 +64,13 @@ serve(async (req) => {
 
     for (const prompt of prompts) {
       try {
-        const aiPrompt = `Analyze this prompt and categorize it into exactly one of these categories: ${CATEGORIES.join(", ")}.
+        const aiPrompt = `Analyze this prompt and categorize it into 1-3 most relevant categories from this list: ${CATEGORIES.join(", ")}.
 
 Title: ${prompt.title}
 Content: ${prompt.content?.substring(0, 500) || ''}
 Description: ${prompt.description || ''}
 
-Respond with ONLY the category name, nothing else.`;
+Respond with ONLY the category names separated by commas (e.g., "Art & Design, Photography"). Choose 1-3 categories that best fit.`;
 
         const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
@@ -93,21 +93,35 @@ Respond with ONLY the category name, nothing else.`;
         }
 
         const data = await response.json();
-        let category = data.choices?.[0]?.message?.content?.trim() || 'Other';
+        const rawCategories = data.choices?.[0]?.message?.content?.trim() || 'Other';
 
-        // Validate category
-        if (!CATEGORIES.includes(category)) {
-          const matched = CATEGORIES.find(c => 
-            category.toLowerCase().includes(c.toLowerCase()) ||
-            c.toLowerCase().includes(category.toLowerCase())
-          );
-          category = matched || 'Other';
-        }
+        // Parse and validate categories
+        const parsedCategories = rawCategories
+          .split(',')
+          .map((c: string) => c.trim())
+          .filter((c: string) => {
+            if (CATEGORIES.includes(c)) return true;
+            const match = CATEGORIES.find(cat => 
+              c.toLowerCase().includes(cat.toLowerCase()) || 
+              cat.toLowerCase().includes(c.toLowerCase())
+            );
+            return !!match;
+          })
+          .map((c: string) => {
+            if (CATEGORIES.includes(c)) return c;
+            return CATEGORIES.find(cat => 
+              c.toLowerCase().includes(cat.toLowerCase()) || 
+              cat.toLowerCase().includes(c.toLowerCase())
+            ) || c;
+          })
+          .slice(0, 3);
 
-        // Update prompt with category
+        const categories = parsedCategories.length > 0 ? parsedCategories : ['Other'];
+
+        // Update prompt with categories array
         const { error: updateError } = await supabase
           .from('prompts')
-          .update({ category })
+          .update({ category: categories })
           .eq('id', prompt.id);
 
         if (updateError) {
@@ -115,7 +129,7 @@ Respond with ONLY the category name, nothing else.`;
           errors.push(`Failed to update prompt ${prompt.id}`);
         } else {
           processed++;
-          console.log(`Categorized prompt ${prompt.id} as: ${category}`);
+          console.log(`Categorized prompt ${prompt.id} as: ${categories.join(', ')}`);
         }
 
         // Small delay to avoid rate limiting

@@ -27,7 +27,7 @@ const UploadPage = () => {
     author: "",
     image_url: "",
     scheduled_at: "",
-    category: "",
+    categories: [] as string[],
   });
 
   const [previewImages, setPreviewImages] = useState<string[]>([]);
@@ -50,7 +50,7 @@ const UploadPage = () => {
             author: data.author,
             image_url: data.image_url || "",
             scheduled_at: "",
-            category: data.category || "",
+            categories: data.category || [],
           });
           if (data.image_url) {
             setPreviewImages([data.image_url]);
@@ -82,8 +82,8 @@ const UploadPage = () => {
         body: { title, content, description }
       });
       
-      if (!error && data?.category) {
-        setFormData(prev => ({ ...prev, category: data.category }));
+      if (!error && data?.categories) {
+        setFormData(prev => ({ ...prev, categories: data.categories }));
       }
     } catch (err) {
       console.error("Categorization error:", err);
@@ -104,7 +104,7 @@ const UploadPage = () => {
     }
 
     // Trigger auto-categorization when content or title changes
-    if ((name === "content" || name === "title") && !formData.category) {
+    if ((name === "content" || name === "title") && formData.categories.length === 0) {
       if (categorizationTimeoutRef.current) {
         clearTimeout(categorizationTimeoutRef.current);
       }
@@ -253,7 +253,7 @@ const UploadPage = () => {
       author: formData.author,
       image_url: imageUrl,
       image_urls: imageUrls.length > 0 ? imageUrls : null,
-      category: formData.category || null,
+      category: formData.categories.length > 0 ? formData.categories : null,
       // Admin prompts are auto-approved, Pro user prompts need approval
       is_approved: isAdmin ? true : false,
     };
@@ -527,11 +527,11 @@ const UploadPage = () => {
               />
             </div>
 
-            {/* Category (AI Generated) */}
+            {/* Categories (AI Generated) */}
             <div className="glass-card p-4 !rounded-2xl border border-accent/20">
               <Label className="flex items-center gap-2 text-sm font-medium mb-3">
                 <Tag className="w-4 h-4 text-accent" />
-                Category
+                Categories
                 {isCategorizing && (
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -539,24 +539,48 @@ const UploadPage = () => {
                   </span>
                 )}
               </Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder="Will be auto-detected by AI..."
-                  className="input-field flex-1"
-                />
-                {formData.category && (
-                  <span className="px-3 py-1.5 bg-accent/20 text-accent-foreground text-sm rounded-full whitespace-nowrap">
-                    {formData.category}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.categories.map((cat, index) => (
+                  <span key={index} className="px-3 py-1.5 bg-accent/20 text-accent-foreground text-sm rounded-full whitespace-nowrap flex items-center gap-1.5">
+                    {cat}
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        categories: prev.categories.filter((_, i) => i !== index)
+                      }))}
+                      className="hover:text-destructive transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </span>
-                )}
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  id="category"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value && !formData.categories.includes(value)) {
+                      setFormData(prev => ({
+                        ...prev,
+                        categories: [...prev.categories, value]
+                      }));
+                    }
+                    e.target.value = "";
+                  }}
+                  className="input-field flex-1"
+                >
+                  <option value="">Add a category...</option>
+                  {["Art & Design", "Writing & Content", "Code & Development", "Business & Marketing", "Education & Learning", "Photography", "Music & Audio", "Video & Animation", "Gaming", "Social Media", "Productivity", "Other"]
+                    .filter(cat => !formData.categories.includes(cat))
+                    .map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                AI will auto-detect category when you enter prompt content, or you can set it manually
+                AI will auto-detect categories when you enter prompt content, or you can add them manually (max 3)
               </p>
             </div>
 
