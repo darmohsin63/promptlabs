@@ -42,6 +42,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          date_of_birth: string | null
           display_name: string | null
           email: string | null
           id: string
@@ -50,6 +51,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           display_name?: string | null
           email?: string | null
           id: string
@@ -58,6 +60,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           display_name?: string | null
           email?: string | null
           id?: string
@@ -73,6 +76,8 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
+          scheduled_at: string | null
           title: string
           updated_at: string | null
           user_id: string
@@ -84,6 +89,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
+          scheduled_at?: string | null
           title: string
           updated_at?: string | null
           user_id: string
@@ -95,6 +102,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
+          scheduled_at?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string

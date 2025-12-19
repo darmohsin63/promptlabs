@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { TableSkeleton, StatCardSkeleton } from "@/components/TableSkeleton";
 import { 
   Shield, 
   Trash2, 
@@ -21,7 +22,10 @@ import {
   X,
   MessageSquare,
   Mail,
-  Check
+  Check,
+  Calendar,
+  User,
+  Clock
 } from "lucide-react";
 import {
   Dialog,
@@ -38,6 +42,7 @@ interface Prompt {
   title: string;
   author: string;
   created_at: string;
+  scheduled_at: string | null;
 }
 
 interface Profile {
@@ -45,6 +50,8 @@ interface Profile {
   email: string;
   display_name: string;
   created_at: string;
+  date_of_birth: string | null;
+  avatar_url: string | null;
 }
 
 interface UserRole {
@@ -71,10 +78,13 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"prompts" | "users" | "feedback">("prompts");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserName, setNewUserName] = useState("");
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -89,9 +99,10 @@ export default function AdminDashboard() {
   }, [isAdmin]);
 
   const fetchData = async () => {
+    setDataLoading(true);
     const [promptsRes, usersRes, rolesRes, feedbackRes] = await Promise.all([
-      supabase.from("prompts").select("id, title, author, created_at").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id, email, display_name, created_at").order("created_at", { ascending: false }),
+      supabase.from("prompts").select("id, title, author, created_at, scheduled_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, email, display_name, created_at, date_of_birth, avatar_url").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("feedback").select("*").order("created_at", { ascending: false }),
     ]);
@@ -100,6 +111,7 @@ export default function AdminDashboard() {
     if (usersRes.data) setUsers(usersRes.data);
     if (rolesRes.data) setUserRoles(rolesRes.data as UserRole[]);
     if (feedbackRes.data) setFeedback(feedbackRes.data);
+    setDataLoading(false);
   };
 
   const deletePrompt = async (id: string) => {
@@ -129,7 +141,6 @@ export default function AdminDashboard() {
     }
 
     if (currentlyAdmin) {
-      // Remove admin role
       const { error } = await supabase
         .from("user_roles")
         .delete()
@@ -143,7 +154,6 @@ export default function AdminDashboard() {
         setUserRoles(userRoles.filter(r => !(r.user_id === userId && r.role === "admin")));
       }
     } else {
-      // Add admin role
       const { error } = await supabase
         .from("user_roles")
         .insert({ user_id: userId, role: "admin" });
@@ -167,13 +177,9 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Delete user's prompts first
     await supabase.from("prompts").delete().eq("user_id", userId);
-    
-    // Delete user roles
     await supabase.from("user_roles").delete().eq("user_id", userId);
     
-    // Delete profile
     const { error } = await supabase.from("profiles").delete().eq("id", userId);
     
     if (error) {
@@ -185,12 +191,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const viewUserDetails = (u: Profile) => {
+    setSelectedUser(u);
+    setShowUserDetailModal(true);
+  };
+
   const addNewUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAddingUser(true);
 
     try {
-      // Create user via Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: newUserEmail,
         password: newUserPassword,
@@ -217,7 +227,6 @@ export default function AdminDashboard() {
       setNewUserPassword("");
       setNewUserName("");
       
-      // Refresh data
       setTimeout(fetchData, 1000);
     } finally {
       setIsAddingUser(false);
@@ -257,6 +266,7 @@ export default function AdminDashboard() {
   };
 
   const unreadCount = feedback.filter(f => !f.is_read).length;
+  const scheduledCount = prompts.filter(p => p.scheduled_at && new Date(p.scheduled_at) > new Date()).length;
 
   if (loading) {
     return (
@@ -281,7 +291,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-muted-foreground text-sm">Manage prompts and users</p>
+              <p className="text-muted-foreground text-sm">Manage prompts, users, and content</p>
             </div>
           </div>
           <Button 
@@ -295,49 +305,66 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-up stagger-1">
-          <div className="glass-panel flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-primary" />
+        {dataLoading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8 animate-fade-up stagger-1">
+            <div className="glass-panel flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground">{prompts.length}</p>
+                <p className="text-sm text-muted-foreground">Total Prompts</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-foreground">{prompts.length}</p>
-              <p className="text-sm text-muted-foreground">Total Prompts</p>
+            <div className="glass-panel flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground">{scheduledCount}</p>
+                <p className="text-sm text-muted-foreground">Scheduled</p>
+              </div>
+            </div>
+            <div className="glass-panel flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground">{users.length}</p>
+                <p className="text-sm text-muted-foreground">Total Users</p>
+              </div>
+            </div>
+            <div className="glass-panel flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
+                <Crown className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground">{adminCount}</p>
+                <p className="text-sm text-muted-foreground">Admins</p>
+              </div>
+            </div>
+            <div className="glass-panel flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center relative">
+                <MessageSquare className="w-6 h-6 text-primary" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground">{feedback.length}</p>
+                <p className="text-sm text-muted-foreground">Feedback</p>
+              </div>
             </div>
           </div>
-          <div className="glass-panel flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
-              <Users className="w-6 h-6 text-accent" />
-            </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-foreground">{users.length}</p>
-              <p className="text-sm text-muted-foreground">Total Users</p>
-            </div>
-          </div>
-          <div className="glass-panel flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Crown className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-foreground">{adminCount}</p>
-              <p className="text-sm text-muted-foreground">Admins</p>
-            </div>
-          </div>
-          <div className="glass-panel flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center relative">
-              <MessageSquare className="w-6 h-6 text-accent" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </div>
-            <div>
-              <p className="text-2xl md:text-3xl font-bold text-foreground">{feedback.length}</p>
-              <p className="text-sm text-muted-foreground">Feedback</p>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Search and Actions */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 animate-fade-up stagger-2">
@@ -408,244 +435,282 @@ export default function AdminDashboard() {
         </div>
 
         {/* Content */}
-        {activeTab === "prompts" && (
-          <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
-            <table className="w-full min-w-[500px]">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Title</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Author</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Date</th>
-                  <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPrompts.map((prompt, index) => (
-                  <tr 
-                    key={prompt.id} 
-                    className="border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up"
-                    style={{ animationDelay: `${index * 30}ms` }}
-                  >
-                    <td className="p-4">
-                      <p className="font-medium text-foreground line-clamp-1">{prompt.title}</p>
-                      <p className="text-xs text-muted-foreground sm:hidden">{prompt.author}</p>
-                    </td>
-                    <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{prompt.author}</td>
-                    <td className="p-4 text-muted-foreground text-sm">
-                      {new Date(prompt.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/prompt/${prompt.id}`)}
-                          className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10"
-                        >
-                          <Eye className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deletePrompt(prompt.id)}
-                          className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredPrompts.length === 0 && (
-              <div className="p-12 text-center">
-                <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  {searchQuery ? "No prompts match your search" : "No prompts yet"}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "users" && (
-          <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
-            <table className="w-full min-w-[500px]">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">User</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Email</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Role</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm hidden md:table-cell">Joined</th>
-                  <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u, index) => {
-                  const isThisUserAdmin = isUserAdmin(u.id);
-                  const isCurrentUser = u.id === user?.id;
-                  
-                  return (
-                    <tr 
-                      key={u.id} 
-                      className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${
-                        isCurrentUser ? "bg-primary/5" : ""
-                      }`}
-                      style={{ animationDelay: `${index * 30}ms` }}
-                    >
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
-                            isThisUserAdmin 
-                              ? "bg-gradient-to-br from-primary to-accent" 
-                              : "bg-muted-foreground/30"
-                          }`}>
-                            {(u.display_name || u.email || "?")[0].toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground flex items-center gap-2">
-                              {u.display_name || "—"}
-                              {isCurrentUser && (
-                                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
-                              )}
-                            </p>
-                            <p className="text-xs text-muted-foreground sm:hidden">{u.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{u.email}</td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          isThisUserAdmin 
-                            ? "bg-primary/15 text-primary" 
-                            : "bg-muted text-muted-foreground"
-                        }`}>
-                          {isThisUserAdmin ? "Admin" : "User"}
-                        </span>
-                      </td>
-                      <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
-                        {new Date(u.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleAdminRole(u.id)}
-                            disabled={isCurrentUser}
-                            className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${
-                              isThisUserAdmin 
-                                ? "hover:bg-accent/10 text-accent" 
-                                : "hover:bg-primary/10 text-primary"
-                            }`}
-                            title={isThisUserAdmin ? "Remove admin" : "Make admin"}
-                          >
-                            <Crown className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">
-                              {isThisUserAdmin ? "Remove Admin" : "Make Admin"}
-                            </span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteUser(u.id)}
-                            disabled={isCurrentUser}
-                            className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive disabled:opacity-30"
-                            title="Delete user"
-                          >
-                            <UserX className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
+        {dataLoading ? (
+          <TableSkeleton rows={5} columns={4} />
+        ) : (
+          <>
+            {activeTab === "prompts" && (
+              <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
+                <table className="w-full min-w-[500px]">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      <th className="text-left p-4 font-semibold text-foreground text-sm">Title</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Author</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm">Status</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm hidden md:table-cell">Date</th>
+                      <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {filteredUsers.length === 0 && (
-              <div className="p-12 text-center">
-                <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  {searchQuery ? "No users match your search" : "No users yet"}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "feedback" && (
-          <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
-            <table className="w-full min-w-[500px]">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Email</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Message</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Date</th>
-                  <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFeedback.map((f, index) => (
-                  <tr 
-                    key={f.id} 
-                    className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${
-                      !f.is_read ? "bg-primary/5" : ""
-                    }`}
-                    style={{ animationDelay: `${index * 30}ms` }}
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium text-foreground text-sm">{f.email}</span>
-                        {!f.is_read && (
-                          <span className="px-2 py-0.5 bg-primary/15 text-primary text-xs rounded-full">New</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <p className="text-muted-foreground text-sm line-clamp-2 max-w-md">{f.message}</p>
-                    </td>
-                    <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">
-                      {new Date(f.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {!f.is_read && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => markAsRead(f.id)}
-                            className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10"
-                            title="Mark as read"
-                          >
-                            <Check className="w-4 h-4 text-primary" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteFeedback(f.id)}
-                          className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive"
-                          title="Delete feedback"
+                  </thead>
+                  <tbody>
+                    {filteredPrompts.map((prompt, index) => {
+                      const isScheduled = prompt.scheduled_at && new Date(prompt.scheduled_at) > new Date();
+                      return (
+                        <tr 
+                          key={prompt.id} 
+                          className="border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up"
+                          style={{ animationDelay: `${index * 30}ms` }}
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredFeedback.length === 0 && (
-              <div className="p-12 text-center">
-                <MessageSquare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  {searchQuery ? "No feedback matches your search" : "No feedback yet"}
-                </p>
+                          <td className="p-4">
+                            <p className="font-medium text-foreground line-clamp-1">{prompt.title}</p>
+                            <p className="text-xs text-muted-foreground sm:hidden">{prompt.author}</p>
+                          </td>
+                          <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{prompt.author}</td>
+                          <td className="p-4">
+                            {isScheduled ? (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-accent/15 text-accent flex items-center gap-1 w-fit">
+                                <Clock className="w-3 h-3" />
+                                Scheduled
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary">
+                                Published
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
+                            {isScheduled 
+                              ? new Date(prompt.scheduled_at!).toLocaleDateString()
+                              : new Date(prompt.created_at).toLocaleDateString()
+                            }
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate(`/prompt/${prompt.id}`)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10"
+                              >
+                                <Eye className="w-4 h-4 text-muted-foreground" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deletePrompt(prompt.id)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {filteredPrompts.length === 0 && (
+                  <div className="p-12 text-center">
+                    <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {searchQuery ? "No prompts match your search" : "No prompts yet"}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+
+            {activeTab === "users" && (
+              <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
+                <table className="w-full min-w-[500px]">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      <th className="text-left p-4 font-semibold text-foreground text-sm">User</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Email</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm">Role</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm hidden md:table-cell">Joined</th>
+                      <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((u, index) => {
+                      const isThisUserAdmin = isUserAdmin(u.id);
+                      const isCurrentUser = u.id === user?.id;
+                      
+                      return (
+                        <tr 
+                          key={u.id} 
+                          className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${
+                            isCurrentUser ? "bg-primary/5" : ""
+                          }`}
+                          style={{ animationDelay: `${index * 30}ms` }}
+                        >
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden ${
+                                isThisUserAdmin 
+                                  ? "bg-gradient-to-br from-primary to-accent" 
+                                  : "bg-muted-foreground/30"
+                              }`}>
+                                {u.avatar_url ? (
+                                  <img src={u.avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  (u.display_name || u.email || "?")[0].toUpperCase()
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground flex items-center gap-2">
+                                  {u.display_name || "—"}
+                                  {isCurrentUser && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
+                                  )}
+                                </p>
+                                <p className="text-xs text-muted-foreground sm:hidden">{u.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{u.email}</td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              isThisUserAdmin 
+                                ? "bg-primary/15 text-primary" 
+                                : "bg-muted text-muted-foreground"
+                            }`}>
+                              {isThisUserAdmin ? "Admin" : "User"}
+                            </span>
+                          </td>
+                          <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
+                            {new Date(u.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => viewUserDetails(u)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10"
+                                title="View details"
+                              >
+                                <Eye className="w-4 h-4 text-muted-foreground" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleAdminRole(u.id)}
+                                disabled={isCurrentUser}
+                                className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${
+                                  isThisUserAdmin 
+                                    ? "hover:bg-accent/10 text-accent" 
+                                    : "hover:bg-primary/10 text-primary"
+                                }`}
+                                title={isThisUserAdmin ? "Remove admin" : "Make admin"}
+                              >
+                                <Crown className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">
+                                  {isThisUserAdmin ? "Remove" : "Admin"}
+                                </span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteUser(u.id)}
+                                disabled={isCurrentUser}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive disabled:opacity-30"
+                                title="Delete user"
+                              >
+                                <UserX className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {filteredUsers.length === 0 && (
+                  <div className="p-12 text-center">
+                    <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {searchQuery ? "No users match your search" : "No users yet"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "feedback" && (
+              <div className="glass-table animate-fade-up stagger-3 overflow-x-auto">
+                <table className="w-full min-w-[500px]">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      <th className="text-left p-4 font-semibold text-foreground text-sm">Email</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm">Message</th>
+                      <th className="text-left p-4 font-semibold text-foreground text-sm hidden sm:table-cell">Date</th>
+                      <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredFeedback.map((f, index) => (
+                      <tr 
+                        key={f.id} 
+                        className={`border-b border-border/30 hover:bg-primary/5 transition-colors animate-fade-up ${
+                          !f.is_read ? "bg-primary/5" : ""
+                        }`}
+                        style={{ animationDelay: `${index * 30}ms` }}
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <span className="font-medium text-foreground text-sm">{f.email}</span>
+                            {!f.is_read && (
+                              <span className="px-2 py-0.5 bg-primary/15 text-primary text-xs rounded-full">New</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-muted-foreground text-sm line-clamp-2 max-w-md">{f.message}</p>
+                        </td>
+                        <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">
+                          {new Date(f.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {!f.is_read && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => markAsRead(f.id)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10"
+                                title="Mark as read"
+                              >
+                                <Check className="w-4 h-4 text-primary" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteFeedback(f.id)}
+                              className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                              title="Delete feedback"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredFeedback.length === 0 && (
+                  <div className="p-12 text-center">
+                    <MessageSquare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {searchQuery ? "No feedback matches your search" : "No feedback yet"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </main>
 
@@ -728,6 +793,118 @@ export default function AdminDashboard() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Detail Modal */}
+      <Dialog open={showUserDetailModal} onOpenChange={setShowUserDetailModal}>
+        <DialogContent className="glass-panel border-glass-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" />
+              User Profile
+            </DialogTitle>
+            <DialogDescription>
+              View complete user information
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedUser && (
+            <div className="space-y-6">
+              {/* Avatar */}
+              <div className="flex justify-center">
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white overflow-hidden ${
+                  isUserAdmin(selectedUser.id) 
+                    ? "bg-gradient-to-br from-primary to-accent" 
+                    : "bg-muted-foreground/30"
+                }`}>
+                  {selectedUser.avatar_url ? (
+                    <img src={selectedUser.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (selectedUser.display_name || selectedUser.email || "?")[0].toUpperCase()
+                  )}
+                </div>
+              </div>
+
+              {/* Info Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
+                  <User className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Display Name</p>
+                    <p className="font-medium text-foreground">{selectedUser.display_name || "Not set"}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
+                  <Mail className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="font-medium text-foreground">{selectedUser.email}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
+                  <Calendar className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Date of Birth</p>
+                    <p className="font-medium text-foreground">
+                      {selectedUser.date_of_birth 
+                        ? new Date(selectedUser.date_of_birth).toLocaleDateString("en-US", { 
+                            year: "numeric", 
+                            month: "long", 
+                            day: "numeric" 
+                          })
+                        : "Not set"
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
+                  <Crown className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Role</p>
+                    <p className={`font-medium ${isUserAdmin(selectedUser.id) ? "text-primary" : "text-foreground"}`}>
+                      {isUserAdmin(selectedUser.id) ? "Administrator" : "User"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Joined</p>
+                    <p className="font-medium text-foreground">
+                      {new Date(selectedUser.created_at).toLocaleDateString("en-US", { 
+                        year: "numeric", 
+                        month: "long", 
+                        day: "numeric" 
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Security notice */}
+                <div className="p-3 rounded-xl bg-accent/10 border border-accent/20">
+                  <p className="text-xs text-accent flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Passwords are encrypted and cannot be viewed
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowUserDetailModal(false)}
+              className="glass-card"
+            >
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

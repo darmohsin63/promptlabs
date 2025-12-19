@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Robot3D } from "@/components/Robot3D";
+import { Mail, Lock, User, ArrowRight, Cpu } from "lucide-react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -70,29 +71,38 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* 3D Robot Background */}
+      <Suspense fallback={
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Cpu className="w-16 h-16 text-primary/20 animate-pulse" />
+        </div>
+      }>
+        <Robot3D />
+      </Suspense>
+
       <Header />
       
-      <main className="container pt-20 pb-12 px-4">
+      <main className="container pt-20 pb-12 px-4 relative z-10">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8 animate-fade-up">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-br from-primary to-accent mx-auto flex items-center justify-center mb-6 shadow-glow">
-              <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-white" />
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-br from-primary to-accent mx-auto flex items-center justify-center mb-6 shadow-glow animate-glow-pulse">
+              <Cpu className="w-8 h-8 md:w-10 md:h-10 text-white" />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              {isLogin ? "Welcome back" : "Create account"}
+              {isLogin ? "Welcome back" : "Join the future"}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm md:text-base">
               {isLogin
-                ? "Sign in to manage your prompts"
-                : "Join Prompt Hub and start sharing"}
+                ? "Sign in to access your prompts"
+                : "Create your account and start exploring"}
             </p>
           </div>
 
-          <div className="glass-panel animate-fade-up stagger-1">
+          <div className="glass-panel animate-fade-up stagger-1 backdrop-blur-xl">
             <form onSubmit={handleSubmit} className="space-y-5">
               {!isLogin && (
-                <div className="space-y-2">
+                <div className="space-y-2 animate-fade-up">
                   <Label htmlFor="displayName" className="text-sm font-medium">Display Name</Label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
