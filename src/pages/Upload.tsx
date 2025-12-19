@@ -129,6 +129,12 @@ const UploadPage = () => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Validation constants matching database constraints
+  const MAX_TITLE_LENGTH = 200;
+  const MAX_AUTHOR_LENGTH = 100;
+  const MAX_DESCRIPTION_LENGTH = 500;
+  const MAX_CONTENT_LENGTH = 10000;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -145,6 +151,43 @@ const UploadPage = () => {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate field lengths
+    if (formData.title.length > MAX_TITLE_LENGTH) {
+      toast({
+        title: "Title too long",
+        description: `Title must be ${MAX_TITLE_LENGTH} characters or less`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.author.length > MAX_AUTHOR_LENGTH) {
+      toast({
+        title: "Author name too long",
+        description: `Author name must be ${MAX_AUTHOR_LENGTH} characters or less`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.description && formData.description.length > MAX_DESCRIPTION_LENGTH) {
+      toast({
+        title: "Description too long",
+        description: `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.content.length > MAX_CONTENT_LENGTH) {
+      toast({
+        title: "Content too long",
+        description: `Prompt content must be ${MAX_CONTENT_LENGTH} characters or less`,
         variant: "destructive",
       });
       return;
@@ -373,6 +416,7 @@ const UploadPage = () => {
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
                 Prompt Title <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground ml-2">({formData.title.length}/200)</span>
               </label>
               <input
                 type="text"
@@ -383,6 +427,7 @@ const UploadPage = () => {
                 placeholder="e.g., Cinematic Portrait Photography"
                 className="input-field"
                 required
+                maxLength={200}
               />
             </div>
 
@@ -390,6 +435,7 @@ const UploadPage = () => {
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
                 Short Description
+                <span className="text-xs text-muted-foreground ml-2">({formData.description.length}/500)</span>
               </label>
               <input
                 type="text"
@@ -399,6 +445,7 @@ const UploadPage = () => {
                 onChange={handleChange}
                 placeholder="Brief description of what this prompt creates"
                 className="input-field"
+                maxLength={500}
               />
             </div>
 
@@ -406,6 +453,7 @@ const UploadPage = () => {
             <div>
               <label htmlFor="content" className="block text-sm font-medium text-foreground mb-2">
                 Full Prompt <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground ml-2">({formData.content.length}/10000)</span>
               </label>
               <textarea
                 id="content"
@@ -416,6 +464,7 @@ const UploadPage = () => {
                 rows={6}
                 className="input-field resize-none"
                 required
+                maxLength={10000}
               />
             </div>
 
@@ -423,6 +472,7 @@ const UploadPage = () => {
             <div>
               <label htmlFor="author" className="block text-sm font-medium text-foreground mb-2">
                 Author Name <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground ml-2">({formData.author.length}/100)</span>
               </label>
               <input
                 type="text"
@@ -433,6 +483,7 @@ const UploadPage = () => {
                 placeholder="Your name"
                 className="input-field"
                 required
+                maxLength={100}
               />
             </div>
 

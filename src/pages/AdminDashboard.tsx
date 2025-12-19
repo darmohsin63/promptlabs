@@ -82,7 +82,6 @@ export default function AdminDashboard() {
   const [showUserDetailModal, setShowUserDetailModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserName, setNewUserName] = useState("");
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -249,16 +248,20 @@ export default function AdminDashboard() {
     setShowUserDetailModal(true);
   };
 
-  const addNewUser = async (e: React.FormEvent) => {
+  const inviteNewUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAddingUser(true);
 
     try {
+      // Generate a secure temporary password that will be changed on first login
+      const tempPassword = crypto.randomUUID() + "!Aa1";
+      
+      // Create user with temporary password
       const { data, error } = await supabase.auth.signUp({
         email: newUserEmail,
-        password: newUserPassword,
+        password: tempPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
             display_name: newUserName || newUserEmail.split("@")[0],
           },
@@ -270,14 +273,27 @@ export default function AdminDashboard() {
         return;
       }
 
-      toast({ 
-        title: "User created", 
-        description: "New user account has been created successfully." 
-      });
+      // Send password reset email so user can set their own password
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        newUserEmail,
+        { redirectTo: `${window.location.origin}/auth?type=recovery` }
+      );
+
+      if (resetError) {
+        toast({ 
+          title: "Partial success", 
+          description: "Account created but couldn't send password setup email. User should use 'Forgot Password'.",
+          variant: "destructive"
+        });
+      } else {
+        toast({ 
+          title: "Invitation sent", 
+          description: "User will receive an email to set their password." 
+        });
+      }
       
       setShowAddUserModal(false);
       setNewUserEmail("");
-      setNewUserPassword("");
       setNewUserName("");
       
       setTimeout(fetchData, 1000);
@@ -800,22 +816,22 @@ export default function AdminDashboard() {
         )}
       </main>
 
-      {/* Add User Modal */}
+      {/* Invite User Modal */}
       <Dialog open={showAddUserModal} onOpenChange={setShowAddUserModal}>
         <DialogContent className="glass-panel border-glass-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-primary" />
-              Add New User
+              Invite New User
             </DialogTitle>
             <DialogDescription>
-              Create a new user account. They will receive a confirmation email.
+              Send an invitation email. The user will set their own password securely.
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={addNewUser} className="space-y-4">
+          <form onSubmit={inviteNewUser} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="newUserName">Display Name</Label>
+              <Label htmlFor="newUserName">Display Name (optional)</Label>
               <Input
                 id="newUserName"
                 type="text"
@@ -823,6 +839,7 @@ export default function AdminDashboard() {
                 value={newUserName}
                 onChange={(e) => setNewUserName(e.target.value)}
                 className="input-field"
+                maxLength={100}
               />
             </div>
             <div className="space-y-2">
@@ -835,20 +852,15 @@ export default function AdminDashboard() {
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 required
                 className="input-field"
+                maxLength={255}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="newUserPassword">Password *</Label>
-              <Input
-                id="newUserPassword"
-                type="password"
-                placeholder="••••••••"
-                value={newUserPassword}
-                onChange={(e) => setNewUserPassword(e.target.value)}
-                required
-                minLength={6}
-                className="input-field"
-              />
+            
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+              <p className="text-xs text-primary flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                User will receive an email to set their own password securely
+              </p>
             </div>
             
             <DialogFooter className="gap-2">
@@ -868,12 +880,12 @@ export default function AdminDashboard() {
                 {isAddingUser ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating...
+                    Sending...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Create User
+                    <Mail className="w-4 h-4" />
+                    Send Invitation
                   </span>
                 )}
               </Button>
