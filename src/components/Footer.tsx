@@ -85,6 +85,8 @@ export function Footer() {
               <img 
                 src={logo} 
                 alt="PromptHub" 
+                width={140}
+                height={48}
                 className="h-12 w-auto rounded-xl object-cover transition-all duration-300 group-hover:scale-105" 
               />
             </Link>

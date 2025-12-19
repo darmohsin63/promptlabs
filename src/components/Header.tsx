@@ -18,6 +18,8 @@ export function Header() {
           <img 
             src={logo} 
             alt="PromptHub Logo" 
+            width={117}
+            height={40}
             className="h-8 md:h-10 w-auto rounded-lg transition-all duration-300 group-hover:scale-105"
           />
         </Link>

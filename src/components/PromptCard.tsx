@@ -14,11 +14,12 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
       className="prompt-card group block animate-fade-up glow-border"
       style={{ animationDelay: `${index * 50}ms` }}
     >
-      <div className="overflow-hidden relative bg-secondary/30">
+      <div className="overflow-hidden relative bg-secondary/30 aspect-[4/5]">
         <img
           src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
           alt={prompt.title}
-          className="w-full h-auto object-cover transition-all duration-700 group-hover:scale-105"
+          loading="lazy"
+          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
