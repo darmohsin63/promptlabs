@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isPro: boolean;
   loading: boolean;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -18,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,10 +30,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (session?.user) {
           setTimeout(() => {
-            checkAdminRole(session.user.id);
+            checkRoles(session.user.id);
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsPro(false);
         }
       }
     );
@@ -40,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkAdminRole(session.user.id);
+        checkRoles(session.user.id);
       }
       setLoading(false);
     });
@@ -48,15 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkRoles = async (userId: string) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
+      .eq("user_id", userId);
     
-    setIsAdmin(!!data);
+    if (data) {
+      setIsAdmin(data.some(r => r.role === "admin"));
+      setIsPro(data.some(r => r.role === "pro"));
+    } else {
+      setIsAdmin(false);
+      setIsPro(false);
+    }
   };
 
   const signUp = async (email: string, password: string, displayName?: string) => {
@@ -88,10 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
+    setIsPro(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isPro, loading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

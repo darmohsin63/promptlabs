@@ -7,9 +7,15 @@ export interface Prompt {
   description: string | null;
   content: string;
   image_url: string | null;
+  image_urls: string[] | null;
   author: string;
   created_at: string;
   user_id: string;
+  scheduled_at: string | null;
+  is_approved: boolean | null;
+  approved_at: string | null;
+  approved_by: string | null;
+  updated_at: string | null;
 }
 
 export function usePrompts() {

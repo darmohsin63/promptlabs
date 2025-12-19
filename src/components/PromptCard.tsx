@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom";
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, Bookmark, Clock } from "lucide-react";
 import { Prompt } from "@/hooks/usePrompts";
+import { useSavedPrompts } from "@/hooks/useSavedPrompts";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface PromptCardProps {
-  prompt: Prompt;
+  prompt: Prompt & { is_approved?: boolean };
   index: number;
+  showStatus?: boolean;
 }
 
 const getOptimizedImageUrl = (url: string, width: number) => {
   if (!url) return "";
-  // For Supabase storage images, add width parameter for optimization
   if (url.includes("supabase.co/storage")) {
     const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}width=${width}&quality=75`;
@@ -19,20 +22,74 @@ const getOptimizedImageUrl = (url: string, width: number) => {
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60";
 
-export function PromptCard({ prompt, index }: PromptCardProps) {
-  const imageUrl = prompt.image_url || DEFAULT_IMAGE;
+export function PromptCard({ prompt, index, showStatus }: PromptCardProps) {
+  const { user } = useAuth();
+  const { isSaved, toggleSave } = useSavedPrompts();
+  const { toast } = useToast();
   
-  // Generate srcset for responsive images
+  const imageUrl = prompt.image_url || DEFAULT_IMAGE;
+  const saved = isSaved(prompt.id);
+  
   const srcSet = prompt.image_url 
     ? `${getOptimizedImageUrl(imageUrl, 400)} 400w, ${getOptimizedImageUrl(imageUrl, 600)} 600w, ${getOptimizedImageUrl(imageUrl, 800)} 800w`
     : undefined;
 
+  const handleSaveClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save prompts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await toggleSave(prompt.id);
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: saved ? "Removed from saved" : "Saved!",
+        description: saved ? "Prompt removed from your collection" : "Prompt added to your collection",
+      });
+    }
+  };
+
+  const isPending = prompt.is_approved === false;
+
   return (
     <Link
       to={`/prompt/${prompt.id}`}
-      className="prompt-card group block animate-fade-up glow-border opacity-0"
+      className="prompt-card group block animate-fade-up glow-border opacity-0 relative"
       style={{ animationDelay: `${index * 50}ms` }}
     >
+      {/* Save button */}
+      <button
+        onClick={handleSaveClick}
+        className={`absolute top-3 right-3 z-10 p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+          saved 
+            ? "bg-primary text-primary-foreground" 
+            : "bg-background/60 text-foreground hover:bg-background/80"
+        }`}
+      >
+        <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+      </button>
+
+      {/* Status badges */}
+      {showStatus && isPending && (
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/90 text-white text-xs font-medium backdrop-blur-sm">
+          <Clock className="w-3 h-3" />
+          Pending
+        </div>
+      )}
+
       <div className="overflow-hidden relative bg-secondary/30 aspect-[4/5]">
         <img
           src={getOptimizedImageUrl(imageUrl, 600)}
