@@ -2,13 +2,30 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
-import { useFeaturedPrompts } from "@/hooks/useFeaturedPrompts";
+import { useFeaturedPrompts, FeaturedPrompt } from "@/hooks/useFeaturedPrompts";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Sparkles, TrendingUp, Star, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Prompt {
   id: string;
@@ -24,6 +41,69 @@ const FEATURE_TYPES = [
   { id: "creators_choice", label: "Creator's Choice", icon: Star },
 ] as const;
 
+interface SortableItemProps {
+  item: FeaturedPrompt;
+  index: number;
+  onRemove: (id: string) => void;
+  getImageUrl: (prompt: { image_url: string | null; image_urls: string[] | null }) => string;
+}
+
+function SortableItem({ item, index, onRemove, getImageUrl }: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors ${
+        isDragging ? "shadow-lg ring-2 ring-primary" : ""
+      }`}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </button>
+      <span className="text-sm font-medium text-muted-foreground w-6">
+        #{index + 1}
+      </span>
+      <img
+        src={getImageUrl(item.prompt)}
+        alt={item.prompt.title}
+        className="w-12 h-12 rounded-lg object-cover"
+      />
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate">{item.prompt.title}</p>
+        <p className="text-sm text-muted-foreground">by {item.prompt.author}</p>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onRemove(item.id)}
+        className="text-destructive hover:text-destructive"
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+}
+
 export default function AdminFeatured() {
   const navigate = useNavigate();
   const { isAdmin, loading: authLoading } = useAuth();
@@ -34,6 +114,7 @@ export default function AdminFeatured() {
     loading: featuredLoading,
     addFeaturedPrompt,
     removeFeaturedPrompt,
+    reorderFeaturedPrompts,
     refetch
   } = useFeaturedPrompts();
   
@@ -41,6 +122,17 @@ export default function AdminFeatured() {
   const [selectedPrompt, setSelectedPrompt] = useState<string>("");
   const [selectedType, setSelectedType] = useState<"prompt_of_day" | "trending" | "creators_choice">("prompt_of_day");
   const [isAdding, setIsAdding] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -100,10 +192,32 @@ export default function AdminFeatured() {
     return prompt.image_url || "/placeholder.svg";
   };
 
+  const handleDragEnd = async (
+    event: DragEndEvent,
+    items: FeaturedPrompt[],
+    featureType: "prompt_of_day" | "trending" | "creators_choice"
+  ) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      const newOrder = newItems.map((item, idx) => ({ id: item.id, display_order: idx }));
+      
+      const success = await reorderFeaturedPrompts(newOrder);
+      if (!success) {
+        toast.error("Failed to reorder");
+      }
+    }
+  };
+
   const renderSection = (
     title: string,
-    items: typeof promptOfDay,
-    Icon: React.ComponentType<{ className?: string }>
+    items: FeaturedPrompt[],
+    Icon: React.ComponentType<{ className?: string }>,
+    featureType: "prompt_of_day" | "trending" | "creators_choice"
   ) => (
     <Card className="mb-6">
       <CardHeader className="flex flex-row items-center gap-2">
@@ -119,36 +233,25 @@ export default function AdminFeatured() {
             No prompts in this section yet
           </p>
         ) : (
-          <div className="space-y-2">
-            {items.map((item, index) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
-              >
-                <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
-                <span className="text-sm font-medium text-muted-foreground w-6">
-                  #{index + 1}
-                </span>
-                <img
-                  src={getImageUrl(item.prompt)}
-                  alt={item.prompt.title}
-                  className="w-12 h-12 rounded-lg object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{item.prompt.title}</p>
-                  <p className="text-sm text-muted-foreground">by {item.prompt.author}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemove(item.id)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragEnd(e, items, featureType)}
+          >
+            <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {items.map((item, index) => (
+                  <SortableItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    onRemove={handleRemove}
+                    getImageUrl={getImageUrl}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         )}
       </CardContent>
     </Card>
@@ -227,9 +330,9 @@ export default function AdminFeatured() {
         </Card>
 
         {/* Sections */}
-        {renderSection("Prompt of the Day", promptOfDay, Sparkles)}
-        {renderSection("Trending", trending, TrendingUp)}
-        {renderSection("Creator's Choice", creatorsChoice, Star)}
+        {renderSection("Prompt of the Day", promptOfDay, Sparkles, "prompt_of_day")}
+        {renderSection("Trending", trending, TrendingUp, "trending")}
+        {renderSection("Creator's Choice", creatorsChoice, Star, "creators_choice")}
       </main>
     </div>
   );

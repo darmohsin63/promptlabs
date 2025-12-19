@@ -112,6 +112,36 @@ export function useFeaturedPrompts() {
     }
   };
 
+  const reorderFeaturedPrompts = async (newOrder: { id: string; display_order: number }[]) => {
+    try {
+      // Optimistically update local state
+      setFeaturedPrompts(prev => {
+        const updated = [...prev];
+        newOrder.forEach(({ id, display_order }) => {
+          const item = updated.find(p => p.id === id);
+          if (item) item.display_order = display_order;
+        });
+        return updated.sort((a, b) => a.display_order - b.display_order);
+      });
+
+      // Update in database
+      for (const { id, display_order } of newOrder) {
+        const { error } = await supabase
+          .from("featured_prompts")
+          .update({ display_order })
+          .eq("id", id);
+
+        if (error) throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error reordering featured prompts:", error);
+      await fetchFeaturedPrompts(); // Revert on error
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchFeaturedPrompts();
   }, []);
@@ -129,6 +159,7 @@ export function useFeaturedPrompts() {
     addFeaturedPrompt,
     removeFeaturedPrompt,
     updateDisplayOrder,
+    reorderFeaturedPrompts,
     refetch: fetchFeaturedPrompts,
   };
 }
