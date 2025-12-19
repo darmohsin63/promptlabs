@@ -7,7 +7,26 @@ interface PromptCardProps {
   index: number;
 }
 
+const getOptimizedImageUrl = (url: string, width: number) => {
+  if (!url) return "";
+  // For Supabase storage images, add width parameter for optimization
+  if (url.includes("supabase.co/storage")) {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}width=${width}&quality=75`;
+  }
+  return url;
+};
+
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60";
+
 export function PromptCard({ prompt, index }: PromptCardProps) {
+  const imageUrl = prompt.image_url || DEFAULT_IMAGE;
+  
+  // Generate srcset for responsive images
+  const srcSet = prompt.image_url 
+    ? `${getOptimizedImageUrl(imageUrl, 400)} 400w, ${getOptimizedImageUrl(imageUrl, 600)} 600w, ${getOptimizedImageUrl(imageUrl, 800)} 800w`
+    : undefined;
+
   return (
     <Link
       to={`/prompt/${prompt.id}`}
@@ -16,11 +35,14 @@ export function PromptCard({ prompt, index }: PromptCardProps) {
     >
       <div className="overflow-hidden relative bg-secondary/30 aspect-[4/5]">
         <img
-          src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
+          src={getOptimizedImageUrl(imageUrl, 600)}
+          srcSet={srcSet}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           alt={prompt.title}
           width={400}
           height={500}
           loading={index < 2 ? "eager" : "lazy"}
+          decoding={index < 2 ? "sync" : "async"}
           fetchPriority={index === 0 ? "high" : undefined}
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
         />
