@@ -13,7 +13,8 @@ import {
   Calendar,
   Users,
   Crown,
-  MessageSquare
+  MessageSquare,
+  Star
 } from "lucide-react";
 
 interface Prompt {
@@ -132,6 +133,14 @@ export default function AdminDashboard() {
       label: "Feedback",
       href: "/admin/feedback",
       badge: unreadCount > 0 ? unreadCount : undefined,
+    },
+    {
+      icon: Star,
+      iconBg: "bg-amber-500/10",
+      iconColor: "text-amber-500",
+      value: "★",
+      label: "Featured",
+      href: "/admin/featured",
     },
   ];
 

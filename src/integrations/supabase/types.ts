@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      featured_prompts: {
+        Row: {
+          created_at: string
+          display_order: number
+          feature_type: string
+          id: string
+          is_active: boolean
+          prompt_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          feature_type: string
+          id?: string
+          is_active?: boolean
+          prompt_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          feature_type?: string
+          id?: string
+          is_active?: boolean
+          prompt_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_prompts_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           created_at: string
