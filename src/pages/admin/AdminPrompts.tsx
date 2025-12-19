@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { TableSkeleton } from "@/components/TableSkeleton";
-import { ArrowLeft, Trash2, Search, Eye, Pencil, Check, Clock } from "lucide-react";
+import { ArrowLeft, Trash2, Search, Eye, Pencil, Check, Clock, Sparkles } from "lucide-react";
 
 interface Prompt {
   id: string;
@@ -16,6 +16,7 @@ interface Prompt {
   created_at: string;
   scheduled_at: string | null;
   is_approved: boolean | null;
+  category: string | null;
 }
 
 export default function AdminPrompts() {
@@ -27,6 +28,7 @@ export default function AdminPrompts() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [dataLoading, setDataLoading] = useState(true);
+  const [categorizing, setCategorizing] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -42,11 +44,34 @@ export default function AdminPrompts() {
     setDataLoading(true);
     const { data } = await supabase
       .from("prompts")
-      .select("id, title, author, created_at, scheduled_at, is_approved")
+      .select("id, title, author, created_at, scheduled_at, is_approved, category")
       .order("created_at", { ascending: false });
     if (data) setPrompts(data);
     setDataLoading(false);
   };
+
+  const batchCategorize = async () => {
+    setCategorizing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('batch-categorize');
+      if (error) throw error;
+      toast({ 
+        title: "Categorization Complete", 
+        description: `Processed ${data.processed} prompts` 
+      });
+      fetchPrompts();
+    } catch (error: any) {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to categorize prompts", 
+        variant: "destructive" 
+      });
+    } finally {
+      setCategorizing(false);
+    }
+  };
+
+  const uncategorizedCount = prompts.filter(p => !p.category).length;
 
   const approvePrompt = async (id: string) => {
     const { error } = await supabase
@@ -108,7 +133,20 @@ export default function AdminPrompts() {
           Back to Dashboard
         </button>
 
-        <h1 className="text-2xl font-bold text-foreground mb-6">{getTitle()}</h1>
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-foreground">{getTitle()}</h1>
+          {uncategorizedCount > 0 && (
+            <Button
+              onClick={batchCategorize}
+              disabled={categorizing}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Sparkles className={`w-4 h-4 ${categorizing ? 'animate-spin' : ''}`} />
+              {categorizing ? 'Categorizing...' : `Categorize ${uncategorizedCount} prompts`}
+            </Button>
+          )}
+        </div>
 
         <div className="relative mb-6">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
