@@ -19,6 +19,7 @@ const UploadPage = () => {
   const { user, isAdmin, isPro, loading } = useAuth();
   const canUpload = isAdmin || isPro;
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [profileName, setProfileName] = useState<string>("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -37,6 +38,23 @@ const UploadPage = () => {
   const [isCategorizing, setIsCategorizing] = useState(false);
   const categorizationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Fetch profile name for author field
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.display_name) {
+            setProfileName(data.display_name);
+            setFormData(prev => ({ ...prev, author: data.display_name }));
+          }
+        });
+    }
+  }, [user]);
+
   // Load existing prompt data if editing
   useEffect(() => {
     if (editId && user && canUpload) {
@@ -47,7 +65,7 @@ const UploadPage = () => {
             title: data.title,
             description: data.description || "",
             content: data.content,
-            author: data.author,
+            author: profileName || data.author,
             image_url: data.image_url || "",
             scheduled_at: "",
             categories: data.category || [],
@@ -59,7 +77,7 @@ const UploadPage = () => {
         setIsLoadingPrompt(false);
       });
     }
-  }, [editId, user, canUpload, getPromptById]);
+  }, [editId, user, canUpload, getPromptById, profileName]);
 
   useEffect(() => {
     if (!loading && (!user || !canUpload)) {
@@ -515,22 +533,20 @@ const UploadPage = () => {
               />
             </div>
 
-            {/* Author */}
+            {/* Author (Auto-filled from profile) */}
             <div>
               <label htmlFor="author" className="block text-sm font-medium text-foreground mb-2">
-                Author Name <span className="text-destructive">*</span>
-                <span className="text-xs text-muted-foreground ml-2">({formData.author.length}/100)</span>
+                Author Name
+                <span className="text-xs text-muted-foreground ml-2">(from your profile)</span>
               </label>
               <input
                 type="text"
                 id="author"
                 name="author"
                 value={formData.author}
-                onChange={handleChange}
-                placeholder="Your name"
-                className="input-field"
-                required
-                maxLength={100}
+                className="input-field opacity-70 cursor-not-allowed"
+                readOnly
+                disabled
               />
             </div>
 

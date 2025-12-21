@@ -109,7 +109,7 @@ export default function Auth() {
                     <Input
                       id="displayName"
                       type="text"
-                      placeholder="Your name"
+                      placeholder="Dar Mohsin"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       className="input-field pl-11"
@@ -125,7 +125,7 @@ export default function Auth() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="darmohsin63@prompthub.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
