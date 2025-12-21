@@ -17,6 +17,7 @@ export interface Prompt {
   approved_by: string | null;
   updated_at: string | null;
   category: string[] | null;
+  approver_name?: string | null;
 }
 
 export function usePrompts() {
@@ -66,6 +67,16 @@ export function usePrompts() {
       .select("*")
       .eq("id", id)
       .maybeSingle();
+
+    // Fetch approver name if prompt was approved
+    if (data && data.approved_by) {
+      const { data: profileData } = await supabase.rpc('get_public_profile', {
+        profile_id: data.approved_by
+      });
+      if (profileData && profileData.length > 0) {
+        return { data: { ...data, approver_name: profileData[0].display_name }, error };
+      }
+    }
 
     return { data, error };
   }, []);
