@@ -534,7 +534,7 @@ const UploadPage = () => {
               />
             </div>
 
-            {/* Categories (AI Generated) */}
+            {/* Categories (AI Generated Only) */}
             <div className="glass-card p-4 !rounded-2xl border border-accent/20">
               <Label className="flex items-center gap-2 text-sm font-medium mb-3">
                 <Tag className="w-4 h-4 text-accent" />
@@ -542,52 +542,44 @@ const UploadPage = () => {
                 {isCategorizing && (
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Loader2 className="w-3 h-3 animate-spin" />
-                    Auto-detecting...
+                    AI analyzing images...
                   </span>
                 )}
               </Label>
               <div className="flex flex-wrap gap-2 mb-3">
-                {formData.categories.map((cat, index) => (
-                  <span key={index} className="px-3 py-1.5 bg-accent/20 text-accent-foreground text-sm rounded-full whitespace-nowrap flex items-center gap-1.5">
-                    {cat}
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        categories: prev.categories.filter((_, i) => i !== index)
-                      }))}
-                      className="hover:text-destructive transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                {formData.categories.length > 0 ? (
+                  formData.categories.map((cat, index) => (
+                    <span key={index} className="px-3 py-1.5 bg-accent/20 text-accent-foreground text-sm rounded-full whitespace-nowrap flex items-center gap-1.5">
+                      {cat}
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({
+                          ...prev,
+                          categories: prev.categories.filter((_, i) => i !== index)
+                        }))}
+                        className="hover:text-destructive transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-muted-foreground italic">
+                    Categories will be auto-detected from your images
                   </span>
-                ))}
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <select
-                  id="category"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value && !formData.categories.includes(value)) {
-                      setFormData(prev => ({
-                        ...prev,
-                        categories: [...prev.categories, value]
-                      }));
-                    }
-                    e.target.value = "";
-                  }}
-                  className="input-field flex-1"
-                >
-                  <option value="">Add a category...</option>
-                  {["Art & Design", "Writing & Content", "Code & Development", "Business & Marketing", "Education & Learning", "Photography", "Music & Audio", "Video & Animation", "Gaming", "Social Media", "Productivity", "Other"]
-                    .filter(cat => !formData.categories.includes(cat))
-                    .map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                </select>
-              </div>
+              <button
+                type="button"
+                onClick={() => categorizePrompt(formData.title, formData.content, formData.description, previewImages)}
+                disabled={isCategorizing || (previewImages.length === 0 && !formData.content && !formData.title)}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Sparkles className="w-4 h-4" />
+                {isCategorizing ? "Analyzing..." : "Re-analyze Categories"}
+              </button>
               <p className="text-xs text-muted-foreground mt-2">
-                AI will auto-detect categories when you enter prompt content, or you can add them manually (max 3)
+                AI analyzes your images and prompt to suggest the best categories
               </p>
             </div>
 
