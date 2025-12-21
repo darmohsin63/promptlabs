@@ -252,6 +252,7 @@ export default function AdminUsers() {
               <tbody>
                 {filteredUsers.map((u) => {
                   const isThisUserAdmin = isUserAdmin(u.id);
+                  const isThisUserSuperAdmin = isUserSuperAdmin(u.id);
                   const isCurrentUser = u.id === user?.id;
                   return (
                     <tr key={u.id} className={`border-b border-border/30 hover:bg-primary/5 transition-colors ${isCurrentUser ? "bg-primary/5" : ""}`}>
@@ -276,9 +277,13 @@ export default function AdminUsers() {
                       <td className="p-4 text-muted-foreground text-sm hidden sm:table-cell">{u.email}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${isThisUserAdmin ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                            {isThisUserAdmin ? "Admin" : "User"}
-                          </span>
+                          {isThisUserSuperAdmin ? (
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary to-accent text-white">Super Admin</span>
+                          ) : (
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${isThisUserAdmin ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+                              {isThisUserAdmin ? "Admin" : "User"}
+                            </span>
+                          )}
                           {isUserPro(u.id) && <span className="px-3 py-1 rounded-full text-xs font-medium bg-accent/15 text-accent">Pro</span>}
                         </div>
                       </td>
@@ -291,7 +296,7 @@ export default function AdminUsers() {
                             variant="ghost"
                             size="sm"
                             onClick={() => toggleAdminRole(u.id)}
-                            disabled={isCurrentUser}
+                            disabled={isCurrentUser || !isSuperAdmin || isThisUserSuperAdmin}
                             className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${isThisUserAdmin ? "hover:bg-accent/10 text-accent" : "hover:bg-primary/10 text-primary"}`}
                             title={isThisUserAdmin ? "Remove admin" : "Make admin"}
                           >
@@ -301,6 +306,7 @@ export default function AdminUsers() {
                             variant="ghost"
                             size="sm"
                             onClick={() => toggleProRole(u.id)}
+                            disabled={!isSuperAdmin || isThisUserSuperAdmin}
                             className={`h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs ${isUserPro(u.id) ? "bg-amber-500/10 text-amber-500" : "hover:bg-amber-500/10 text-muted-foreground hover:text-amber-500"}`}
                             title={isUserPro(u.id) ? "Remove Pro" : "Make Pro"}
                           >
@@ -310,7 +316,7 @@ export default function AdminUsers() {
                             variant="ghost"
                             size="sm"
                             onClick={() => deleteUser(u.id)}
-                            disabled={isCurrentUser}
+                            disabled={isCurrentUser || !isSuperAdmin || isThisUserSuperAdmin}
                             className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive disabled:opacity-30"
                             title="Delete"
                           >
