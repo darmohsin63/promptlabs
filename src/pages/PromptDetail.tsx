@@ -165,6 +165,12 @@ const PromptDetail = () => {
                   day: "numeric",
                 })}
               </span>
+              {prompt.is_approved && prompt.approver_name && (
+                <span className="flex items-center gap-1.5 glass-card !rounded-full px-3 py-1.5 !bg-green-500/20 text-green-600 dark:text-green-400">
+                  <Check className="w-3.5 h-3.5" />
+                  Approved by {prompt.approver_name}
+                </span>
+              )}
             </div>
 
             {prompt.description && (

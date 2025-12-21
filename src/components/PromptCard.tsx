@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, User, Bookmark, Clock } from "lucide-react";
+import { Calendar, User, Bookmark, Clock, Tag } from "lucide-react";
 import { Prompt } from "@/hooks/usePrompts";
 import { useSavedPrompts } from "@/hooks/useSavedPrompts";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,9 +110,28 @@ export function PromptCard({ prompt, index, showStatus }: PromptCardProps) {
         <h3 className="font-semibold text-base md:text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors duration-300">
           {prompt.title}
         </h3>
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+        <p className="text-muted-foreground text-sm mb-3 line-clamp-2 leading-relaxed">
           {prompt.description || prompt.title}
         </p>
+        {/* Categories */}
+        {prompt.category && prompt.category.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {prompt.category.slice(0, 2).map((cat, index) => (
+              <span 
+                key={index} 
+                className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground"
+              >
+                <Tag className="w-2.5 h-2.5" />
+                {cat}
+              </span>
+            ))}
+            {prompt.category.length > 2 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                +{prompt.category.length - 2}
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-full transition-colors group-hover:bg-primary/10 group-hover:text-primary">
             <User className="w-3 h-3" />
