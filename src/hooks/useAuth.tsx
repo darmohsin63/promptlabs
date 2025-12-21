@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   isPro: boolean;
+  isSuperAdmin: boolean;
   loading: boolean;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -20,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setIsAdmin(false);
           setIsPro(false);
+          setIsSuperAdmin(false);
         }
       }
     );
@@ -58,11 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("user_id", userId);
     
     if (data) {
-      setIsAdmin(data.some(r => r.role === "admin"));
+      setIsAdmin(data.some(r => r.role === "admin") || data.some(r => r.role === "super_admin"));
       setIsPro(data.some(r => r.role === "pro"));
+      setIsSuperAdmin(data.some(r => r.role === "super_admin"));
     } else {
       setIsAdmin(false);
       setIsPro(false);
+      setIsSuperAdmin(false);
     }
   };
 
@@ -96,10 +101,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setIsAdmin(false);
     setIsPro(false);
+    setIsSuperAdmin(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, isPro, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isPro, isSuperAdmin, loading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
