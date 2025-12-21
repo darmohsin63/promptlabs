@@ -27,11 +27,11 @@ interface Profile {
 
 interface UserRole {
   user_id: string;
-  role: "admin" | "user" | "pro";
+  role: "admin" | "user" | "pro" | "super_admin";
 }
 
 export default function AdminUsers() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const filter = searchParams.get("filter"); // "admins"
@@ -67,50 +67,83 @@ export default function AdminUsers() {
     setDataLoading(false);
   };
 
-  const isUserAdmin = (userId: string) => userRoles.some(r => r.user_id === userId && r.role === "admin");
+  const isUserAdmin = (userId: string) => userRoles.some(r => r.user_id === userId && (r.role === "admin" || r.role === "super_admin"));
   const isUserPro = (userId: string) => userRoles.some(r => r.user_id === userId && r.role === "pro");
+  const isUserSuperAdmin = (userId: string) => userRoles.some(r => r.user_id === userId && r.role === "super_admin");
 
   const toggleAdminRole = async (userId: string) => {
+    if (!isSuperAdmin) {
+      toast({ title: "Only Super Admin can manage admin roles", variant: "destructive" });
+      return;
+    }
     if (userId === user?.id) {
       toast({ title: "Cannot modify yourself", variant: "destructive" });
       return;
     }
-    const currentlyAdmin = isUserAdmin(userId);
+    if (isUserSuperAdmin(userId)) {
+      toast({ title: "Cannot modify Super Admin", variant: "destructive" });
+      return;
+    }
+    const currentlyAdmin = userRoles.some(r => r.user_id === userId && r.role === "admin");
     if (currentlyAdmin) {
       const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
       if (!error) {
         toast({ title: "Admin role removed" });
         setUserRoles(userRoles.filter(r => !(r.user_id === userId && r.role === "admin")));
+      } else {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
       }
     } else {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
       if (!error) {
         toast({ title: "User is now an admin" });
         setUserRoles([...userRoles, { user_id: userId, role: "admin" }]);
+      } else {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
       }
     }
   };
 
   const toggleProRole = async (userId: string) => {
+    if (!isSuperAdmin) {
+      toast({ title: "Only Super Admin can manage Pro roles", variant: "destructive" });
+      return;
+    }
+    if (isUserSuperAdmin(userId)) {
+      toast({ title: "Cannot modify Super Admin", variant: "destructive" });
+      return;
+    }
     const currentlyPro = isUserPro(userId);
     if (currentlyPro) {
       const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "pro");
       if (!error) {
         toast({ title: "Pro role removed" });
         setUserRoles(userRoles.filter(r => !(r.user_id === userId && r.role === "pro")));
+      } else {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
       }
     } else {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "pro" });
       if (!error) {
         toast({ title: "User is now Pro" });
         setUserRoles([...userRoles, { user_id: userId, role: "pro" }]);
+      } else {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
       }
     }
   };
 
   const deleteUser = async (userId: string) => {
+    if (!isSuperAdmin) {
+      toast({ title: "Only Super Admin can delete users", variant: "destructive" });
+      return;
+    }
     if (userId === user?.id) {
       toast({ title: "Cannot delete yourself", variant: "destructive" });
+      return;
+    }
+    if (isUserSuperAdmin(userId)) {
+      toast({ title: "Cannot delete Super Admin", variant: "destructive" });
       return;
     }
     await supabase.from("prompts").delete().eq("user_id", userId);
@@ -120,6 +153,8 @@ export default function AdminUsers() {
       toast({ title: "User deleted" });
       setUsers(users.filter(u => u.id !== userId));
       setUserRoles(userRoles.filter(r => r.user_id !== userId));
+    } else {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
