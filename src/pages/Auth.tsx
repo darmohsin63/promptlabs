@@ -11,9 +11,9 @@ import { Mail, Lock, User, ArrowRight, Cpu } from "lucide-react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("darmohsin63@prompthub.com");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState("Dar Mohsin");
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, user, isAdmin } = useAuth();
   const navigate = useNavigate();
