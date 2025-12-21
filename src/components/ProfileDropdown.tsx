@@ -157,7 +157,7 @@ export function ProfileDropdown() {
                 )}
                 
                 <Link
-                  to="/profile?tab=saved"
+                  to="/saved-prompts"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground hover:bg-primary/10 transition-colors"
                 >
@@ -171,7 +171,7 @@ export function ProfileDropdown() {
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground hover:bg-primary/10 transition-colors"
                 >
                   <UserCircle className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">Profile</span>
+                  <span className="font-medium">My Profile</span>
                 </Link>
 
                 {isAdmin && (
