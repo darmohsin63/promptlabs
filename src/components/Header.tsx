@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Plus, LogIn, LogOut, Menu, X, Shield, UserCircle } from "lucide-react";
+import { Plus, LogIn, LogOut, Menu, X, Shield, UserCircle, Bookmark } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import logo from "@/assets/logo.png";
 
 export function Header() {
   const location = useLocation();
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, isPro, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const canAddPrompt = isAdmin || isPro;
 
   return (
     <header className="glass-header safe-top">
@@ -41,24 +42,31 @@ export function Header() {
             <>
               {user ? (
                 <>
-                  {isAdmin && (
-                    <>
-                      <Link
-                        to="/upload"
-                        className="btn-primary flex items-center gap-2 text-sm !py-2.5 !px-4"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add Prompt
-                      </Link>
-                      <Link
-                        to="/admin/dashboard"
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-                      >
-                        <Shield className="w-4 h-4" />
-                        Admin
-                      </Link>
-                    </>
+                  {canAddPrompt && (
+                    <Link
+                      to="/upload"
+                      className="btn-primary flex items-center gap-2 text-sm !py-2.5 !px-4"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Prompt
+                    </Link>
                   )}
+                  {isAdmin && (
+                    <Link
+                      to="/admin/dashboard"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </Link>
+                  )}
+                  <Link
+                    to="/profile?tab=saved"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                  >
+                    <Bookmark className="w-4 h-4" />
+                    Saved
+                  </Link>
                   <Link
                     to="/profile"
                     className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
@@ -121,6 +129,24 @@ export function Header() {
               <>
                 {user ? (
                   <>
+                    {canAddPrompt && (
+                      <Link
+                        to="/upload"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2 hover:bg-secondary/50 transition-all"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Prompt
+                      </Link>
+                    )}
+                    <Link
+                      to="/profile?tab=saved"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2 hover:bg-secondary/50 transition-all"
+                    >
+                      <Bookmark className="w-4 h-4" />
+                      Saved Prompts
+                    </Link>
                     <Link
                       to="/profile"
                       onClick={() => setMobileMenuOpen(false)}
@@ -129,27 +155,17 @@ export function Header() {
                       }`}
                     >
                       <UserCircle className="w-4 h-4" />
-                      Edit Profile
+                      Profile
                     </Link>
                     {isAdmin && (
-                      <>
-                        <Link
-                          to="/upload"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2 hover:bg-secondary/50 transition-all"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Add Prompt
-                        </Link>
-                        <Link
-                          to="/admin/dashboard"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2 hover:bg-secondary/50 transition-all"
-                        >
-                          <Shield className="w-4 h-4" />
-                          Admin Dashboard
-                        </Link>
-                      </>
+                      <Link
+                        to="/admin/dashboard"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="px-4 py-3 rounded-xl font-medium text-foreground flex items-center gap-2 hover:bg-secondary/50 transition-all"
+                      >
+                        <Shield className="w-4 h-4" />
+                        Admin Dashboard
+                      </Link>
                     )}
                     <div className="border-t border-border/50 my-2" />
                     <button
