@@ -4,6 +4,7 @@ import logo from "@/assets/logo.png";
 interface CodeStyledPromptProps {
   content: string;
   className?: string;
+  allowCopy?: boolean;
 }
 
 // Vibrant color palette - 7 distinct colors
@@ -86,37 +87,56 @@ const getColorClass = (word: string) => {
   return tokenColors.default;
 };
 
-// Split content into display lines (visual only)
-const splitIntoDisplayLines = (content: string, wordsPerLine: number = 6): string[] => {
+// Split content into display lines with blank lines for code feel
+const splitIntoDisplayLines = (content: string, wordsPerLine: number = 7): string[] => {
   const words = content.split(/\s+/);
   const lines: string[] = [];
+  let lineCount = 0;
   
   for (let i = 0; i < words.length; i += wordsPerLine) {
     lines.push(words.slice(i, i + wordsPerLine).join(" "));
+    lineCount++;
+    // Add blank line every 3 lines for code feel
+    if (lineCount % 3 === 0 && i + wordsPerLine < words.length) {
+      lines.push("");
+    }
   }
   
   return lines;
 };
 
-export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptProps) {
-  const displayLines = useMemo(() => splitIntoDisplayLines(content, 6), [content]);
+export function CodeStyledPrompt({ content, className = "", allowCopy = true }: CodeStyledPromptProps) {
+  const displayLines = useMemo(() => splitIntoDisplayLines(content, 7), [content]);
 
   const tokenizedContent = useMemo(() => {
     return displayLines.map((line, lineIndex) => {
-      const words = line.split(/(\s+)/);
+      // Empty line
+      if (line === "") {
+        return (
+          <div key={lineIndex} className="flex h-5">
+            <span className="w-10 md:w-12 text-right pr-4 text-muted-foreground/40 text-xs border-r border-border/30 mr-4 font-mono">
+              {lineIndex + 1}
+            </span>
+            <span className="flex-1"></span>
+          </div>
+        );
+      }
+
+      const words = line.split(" ");
       
       const tokens = words.map((word, wordIndex) => (
-        <span key={wordIndex} className={word.trim() ? getColorClass(word) : ""}>
-          {word}
+        <span key={wordIndex}>
+          <span className={getColorClass(word)}>{word}</span>
+          {wordIndex < words.length - 1 && <span> </span>}
         </span>
       ));
 
       return (
-        <div key={lineIndex} className="flex hover:bg-muted/30 dark:hover:bg-white/5 transition-colors">
-          <span className="w-8 md:w-10 text-right pr-3 text-muted-foreground/50 select-none text-xs md:text-sm border-r border-border/50 mr-3">
+        <div key={lineIndex} className="flex hover:bg-muted/20 dark:hover:bg-white/5 transition-colors min-h-[1.5rem]">
+          <span className="w-10 md:w-12 text-right pr-4 text-muted-foreground/40 text-xs border-r border-border/30 mr-4 font-mono flex-shrink-0">
             {lineIndex + 1}
           </span>
-          <span className="flex-1">{tokens}</span>
+          <span className="flex-1 pl-1">{tokens}</span>
         </div>
       );
     });
@@ -124,23 +144,18 @@ export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptPr
 
   return (
     <div className={`relative overflow-hidden rounded-xl border border-border shadow-lg ${className}`}>
-      {/* Hidden element for copying original format */}
-      <div 
-        className="absolute -left-[9999px] opacity-0 pointer-events-none"
-        aria-hidden="true"
-        id="prompt-copy-source"
-      >
-        {content}
-      </div>
-
       {/* Title bar with logo */}
       <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/80 dark:bg-[#2D2D2D] border-b border-border">
         <img src={logo} alt="PromptHub" className="w-5 h-5 rounded object-contain" />
         <span className="text-xs text-muted-foreground ml-1 font-mono">darmohsin63.txt</span>
       </div>
       
-      {/* Code content with themed background */}
-      <div className="bg-background dark:bg-[#1E1E1E] p-4 max-h-[12rem] overflow-y-auto overflow-x-hidden">
+      {/* Code content with themed background - prevent copy when not allowed */}
+      <div 
+        className={`bg-background dark:bg-[#1E1E1E] p-4 max-h-[14rem] overflow-y-auto overflow-x-hidden ${!allowCopy ? 'select-none' : ''}`}
+        onCopy={!allowCopy ? (e) => e.preventDefault() : undefined}
+        onContextMenu={!allowCopy ? (e) => e.preventDefault() : undefined}
+      >
         <pre className="font-mono text-sm leading-relaxed">
           <code className="block">{tokenizedContent}</code>
         </pre>

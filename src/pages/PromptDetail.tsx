@@ -188,16 +188,15 @@ const PromptDetail = () => {
                   Prompt
                 </h2>
               </div>
-              {user ? (
-                <CodeStyledPrompt content={prompt.content} />
-              ) : (
-                <div className="glass-panel !p-8 text-center">
-                  <p className="text-muted-foreground mb-4">Sign in to view this prompt</p>
+              <CodeStyledPrompt content={prompt.content} allowCopy={!!user} />
+              {!user && (
+                <div className="mt-4 p-4 glass-panel text-center">
+                  <p className="text-muted-foreground text-sm mb-3">Sign in to copy this prompt</p>
                   <RouterLink 
                     to="/auth" 
-                    className="btn-primary inline-flex items-center gap-2"
+                    className="btn-primary inline-flex items-center gap-2 text-sm"
                   >
-                    Sign In to View
+                    Sign In to Copy
                   </RouterLink>
                 </div>
               )}
