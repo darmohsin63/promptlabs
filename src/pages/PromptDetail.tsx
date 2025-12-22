@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, User, Copy, Check, Pencil, Tag, Bookmark } from "lucide-react";
+import { ArrowLeft, Calendar, User, Copy, Check, Pencil, Tag, Bookmark, Sparkles, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { usePrompts, Prompt } from "@/hooks/usePrompts";
@@ -180,6 +180,44 @@ const PromptDetail = () => {
                 {prompt.description}
               </p>
             )}
+
+            {/* AI Model Disclaimer */}
+            <div className="mb-8 animate-fade-up stagger-2">
+              <div className="relative overflow-hidden rounded-xl border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 p-4 md:p-5">
+                {/* Animated background glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-orange-500/10 to-amber-500/5 animate-pulse" />
+                
+                {/* Content */}
+                <div className="relative flex items-start gap-3 md:gap-4">
+                  <div className="flex-shrink-0 p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30">
+                    <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white animate-pulse" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      <span className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                        Important Disclaimer
+                      </span>
+                    </div>
+                    <p className="text-sm md:text-base font-medium text-foreground leading-relaxed">
+                      This prompt has been <span className="font-bold text-amber-600 dark:text-amber-400">exclusively handcrafted</span> for the{" "}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 font-bold text-amber-700 dark:text-amber-300">
+                        Google Nano Banana Pro
+                      </span>{" "}
+                      edition. We <span className="font-semibold underline decoration-amber-500 decoration-2 underline-offset-2">strongly recommend</span> using this model to achieve the intended results.
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Decorative corner sparkles */}
+                <div className="absolute top-1 right-1 opacity-40">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                </div>
+                <div className="absolute bottom-1 left-1 opacity-30">
+                  <Sparkles className="w-3 h-3 text-orange-500" />
+                </div>
+              </div>
+            </div>
 
             {/* Prompt Box */}
             <div className="mb-8 animate-fade-up stagger-2">
