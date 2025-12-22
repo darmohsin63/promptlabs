@@ -4,45 +4,26 @@ import logo from "@/assets/logo.png";
 interface CodeStyledPromptProps {
   content: string;
   className?: string;
-  allowCopy?: boolean;
 }
 
-// Vibrant color palette - 7 distinct colors
+// Vibrant color palette
 const tokenColors = {
-  action: "text-[#E06C75]",        // Red - action verbs
-  descriptor: "text-[#61AFEF]",    // Blue - descriptive words
-  object: "text-[#C678DD]",        // Purple - objects/things
-  quality: "text-[#E5C07B]",       // Yellow/Gold - qualities
-  connector: "text-[#56B6C2]",     // Cyan - connectors
-  emotion: "text-[#98C379]",       // Green - emotions/mood
-  style: "text-[#D19A66]",         // Orange - style words
-  symbol: "text-[#ABB2BF]",        // Gray - symbols
+  keyword: "text-[#C678DD]",       // Purple - keywords
+  function: "text-[#61AFEF]",      // Blue - functions
   string: "text-[#98C379]",        // Green - strings
-  default: "text-foreground",      // Default text color
+  property: "text-[#E06C75]",      // Red - properties
+  number: "text-[#D19A66]",        // Orange - numbers
+  comment: "text-[#5C6370]",       // Gray - comments
+  tag: "text-[#E5C07B]",           // Yellow - tags
+  symbol: "text-[#ABB2BF]",        // Light gray - symbols
+  type: "text-[#56B6C2]",          // Cyan - types
+  default: "text-foreground",
 };
 
-// Word categories
-const actionWords = ["create", "generate", "make", "write", "design", "build", "develop", "add", "show", "display", "render", "draw", "paint", "capture", "imagine", "visualize", "depict", "illustrate", "portray", "compose", "leaning", "looking", "covering", "crossed", "visible", "standing", "sitting", "walking", "running", "holding", "wearing"];
-const descriptorWords = ["beautiful", "stunning", "elegant", "modern", "classic", "vintage", "dramatic", "subtle", "bold", "soft", "sharp", "smooth", "rough", "young", "old", "tall", "short", "dark", "light", "bright", "dim", "cinematic", "artistic", "professional", "natural", "artificial"];
-const objectWords = ["portrait", "image", "photo", "picture", "scene", "background", "man", "woman", "person", "face", "eyes", "hair", "hands", "body", "chair", "table", "window", "door", "wall", "floor", "room", "camera", "lens", "light", "shadow", "color", "texture"];
-const qualityWords = ["high", "low", "ultra", "extreme", "maximum", "minimum", "resolution", "quality", "detail", "contrast", "saturation", "warm", "cool", "neutral", "vivid", "muted", "rich", "deep", "curly", "straight", "wavy", "smooth", "textured"];
-const connectorWords = ["with", "and", "or", "but", "the", "a", "an", "in", "on", "at", "by", "for", "from", "to", "of", "over", "under", "between", "toward", "towards", "into", "onto", "upon", "within"];
-const emotionWords = ["moody", "happy", "sad", "angry", "calm", "peaceful", "intense", "romantic", "mysterious", "dramatic", "serene", "energetic", "melancholic", "joyful", "somber", "vibrant", "atmospheric"];
-const styleWords = ["realistic", "abstract", "minimalist", "maximalist", "surreal", "photorealistic", "artistic", "commercial", "editorial", "fashion", "wooden", "metal", "glass", "fabric", "leather", "stone", "cane-woven", "handcrafted", "rustic", "contemporary"];
+// Code keywords
+const keywords = ["const", "let", "var", "function", "return", "import", "export", "from", "async", "await", "new", "class", "extends", "if", "else", "for", "while", "switch", "case", "break", "default", "try", "catch", "throw", "typeof", "instanceof"];
 
-const getColorClass = (word: string) => {
-  const cleanWord = word.toLowerCase().replace(/[.,!?;:()[\]{}'"<>]/g, "");
-  if (actionWords.includes(cleanWord)) return tokenColors.action;
-  if (descriptorWords.includes(cleanWord)) return tokenColors.descriptor;
-  if (objectWords.includes(cleanWord)) return tokenColors.object;
-  if (qualityWords.includes(cleanWord)) return tokenColors.quality;
-  if (connectorWords.includes(cleanWord)) return tokenColors.connector;
-  if (emotionWords.includes(cleanWord)) return tokenColors.emotion;
-  if (styleWords.includes(cleanWord)) return tokenColors.style;
-  return tokenColors.default;
-};
-
-// Convert content to code-like format with syntax
+// Convert content to authentic code format
 const formatAsCode = (content: string): string[] => {
   const words = content.split(/\s+/);
   const lines: string[] = [];
@@ -55,53 +36,137 @@ const formatAsCode = (content: string): string[] => {
     return seed / 233280;
   };
   
+  // Generate random variable names
+  const varNames = ["style", "scene", "subject", "mood", "lighting", "composition", "detail", "texture", "color", "atmosphere"];
+  const getVar = () => varNames[Math.floor(seededRandom() * varNames.length)];
+  
   let wordIndex = 0;
-  let isInFunction = false;
-  let lineCount = 0;
+  
+  // Header comment
+  lines.push(`// @prompt-config v2.1.0`);
+  lines.push(`// @author darmohsin63`);
+  lines.push(`// @type image-generation`);
+  lines.push(``);
+  
+  // Import statement
+  lines.push(`import { createPrompt } from "@prompthub/core";`);
+  lines.push(``);
+  
+  // Main function
+  lines.push(`export const generateImage = async () => {`);
+  lines.push(`  const config = {`);
   
   while (wordIndex < words.length) {
     const chunk = words.slice(wordIndex, wordIndex + wordsPerLine);
-    let line = "";
+    const chunkText = chunk.join(" ");
+    const rand = seededRandom();
     
-    // Add code-like formatting based on position
-    if (lineCount === 0) {
-      // First line - function declaration style
-      line = `prompt.create({`;
-      isInFunction = true;
-    } else if (wordIndex + wordsPerLine >= words.length) {
-      // Last content line
-      line = `  "${chunk.join(" ")}"`;
-      lines.push(line);
-      lines.push(`});`);
+    if (wordIndex + wordsPerLine >= words.length) {
+      // Last chunk
+      lines.push(`    output: "${chunkText}"`);
       break;
+    } else if (rand > 0.8) {
+      // Array style
+      lines.push(`    ${getVar()}: ["${chunkText}"],`);
+    } else if (rand > 0.6) {
+      // Tagged template
+      lines.push(`    ${getVar()}: \`${chunkText}\`,`);
+    } else if (rand > 0.4) {
+      // Object property
+      lines.push(`    "${getVar()}": "${chunkText}",`);
     } else {
-      // Middle lines - property style
-      const propName = chunk[0]?.toLowerCase().replace(/[^a-z]/g, "") || "desc";
-      const restWords = chunk.slice(1).join(" ");
-      
-      if (seededRandom() > 0.7) {
-        // Object property style
-        line = `  ${propName}: "${restWords}",`;
-      } else if (seededRandom() > 0.5) {
-        // String continuation
-        line = `  "${chunk.join(" ")}" +`;
-      } else {
-        // Array item style
-        line = `  ["${chunk.join(" ")}"],`;
-      }
+      // Regular string
+      lines.push(`    ${getVar()}: "${chunkText}",`);
     }
     
-    lines.push(line);
     wordIndex += wordsPerLine;
-    lineCount++;
     
-    // Random blank line
-    if (seededRandom() > 0.75 && wordIndex < words.length - wordsPerLine) {
-      lines.push("");
+    // Random blank line or comment
+    if (seededRandom() > 0.7 && wordIndex < words.length - wordsPerLine) {
+      if (seededRandom() > 0.5) {
+        lines.push(``);
+      } else {
+        const comments = ["// additional styling", "// composition details", "// mood settings", "// fine-tune parameters"];
+        lines.push(`    ${comments[Math.floor(seededRandom() * comments.length)]}`);
+      }
     }
   }
   
+  lines.push(`  };`);
+  lines.push(``);
+  lines.push(`  return await createPrompt(config);`);
+  lines.push(`};`);
+  
   return lines;
+};
+
+// Tokenize and color a line
+const tokenizeLine = (line: string): JSX.Element[] => {
+  const tokens: JSX.Element[] = [];
+  
+  // Check for comment
+  if (line.trim().startsWith("//")) {
+    return [<span key="comment" className={tokenColors.comment}>{line}</span>];
+  }
+  
+  let i = 0;
+  let currentToken = "";
+  let inString = false;
+  let stringChar = "";
+  
+  const pushToken = (text: string, color: string) => {
+    if (text) {
+      tokens.push(<span key={tokens.length} className={color}>{text}</span>);
+    }
+  };
+  
+  while (i < line.length) {
+    const char = line[i];
+    
+    // Handle strings
+    if ((char === '"' || char === "'" || char === "`") && !inString) {
+      pushToken(currentToken, getTokenColor(currentToken));
+      currentToken = char;
+      inString = true;
+      stringChar = char;
+    } else if (char === stringChar && inString) {
+      currentToken += char;
+      pushToken(currentToken, tokenColors.string);
+      currentToken = "";
+      inString = false;
+      stringChar = "";
+    } else if (inString) {
+      currentToken += char;
+    } else if ('{}[]();:,=<>'.includes(char)) {
+      pushToken(currentToken, getTokenColor(currentToken));
+      currentToken = "";
+      pushToken(char, tokenColors.symbol);
+    } else if (char === " ") {
+      pushToken(currentToken, getTokenColor(currentToken));
+      currentToken = "";
+      tokens.push(<span key={tokens.length}> </span>);
+    } else {
+      currentToken += char;
+    }
+    i++;
+  }
+  
+  if (currentToken) {
+    pushToken(currentToken, inString ? tokenColors.string : getTokenColor(currentToken));
+  }
+  
+  return tokens;
+};
+
+const getTokenColor = (token: string): string => {
+  const clean = token.trim();
+  if (!clean) return tokenColors.default;
+  if (keywords.includes(clean)) return tokenColors.keyword;
+  if (clean.startsWith("@")) return tokenColors.tag;
+  if (/^\d+$/.test(clean)) return tokenColors.number;
+  if (clean === "async" || clean === "await" || clean === "export" || clean === "import" || clean === "const" || clean === "let" || clean === "return" || clean === "from") return tokenColors.keyword;
+  if (clean === "createPrompt" || clean === "generateImage") return tokenColors.function;
+  return tokenColors.property;
 };
 
 export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptProps) {
@@ -120,54 +185,17 @@ export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptPr
         );
       }
 
-      // Tokenize line with syntax highlighting
-      const tokens: JSX.Element[] = [];
-      let i = 0;
-      let currentWord = "";
+      const tokens = tokenizeLine(line);
       
-      while (i < line.length) {
-        const char = line[i];
-        
-        // Check for symbols
-        if ('{}[]();:,+"\''.includes(char)) {
-          // Push current word if exists
-          if (currentWord) {
-            tokens.push(
-              <span key={`word-${i}`} className={getColorClass(currentWord)}>{currentWord}</span>
-            );
-            currentWord = "";
-          }
-          // Push symbol
-          tokens.push(
-            <span key={`sym-${i}`} className={tokenColors.symbol}>{char}</span>
-          );
-        } else if (char === " ") {
-          if (currentWord) {
-            tokens.push(
-              <span key={`word-${i}`} className={getColorClass(currentWord)}>{currentWord}</span>
-            );
-            currentWord = "";
-          }
-          tokens.push(<span key={`space-${i}`}> </span>);
-        } else {
-          currentWord += char;
-        }
-        i++;
-      }
-      
-      // Push remaining word
-      if (currentWord) {
-        tokens.push(
-          <span key={`word-end`} className={getColorClass(currentWord)}>{currentWord}</span>
-        );
-      }
+      // Calculate indentation
+      const indent = line.match(/^(\s*)/)?.[1] || "";
 
       return (
         <div key={lineIndex} className="flex hover:bg-muted/20 dark:hover:bg-white/5 transition-colors min-h-[1.5rem]">
           <span className="w-10 md:w-12 text-right pr-4 text-muted-foreground/40 text-xs border-r border-border/30 mr-4 font-mono flex-shrink-0">
             {lineIndex + 1}
           </span>
-          <span className="flex-1 pl-1 break-words">{tokens}</span>
+          <span className="flex-1 break-words whitespace-pre-wrap">{tokens}</span>
         </div>
       );
     });
@@ -179,6 +207,9 @@ export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptPr
       <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/80 dark:bg-[#2D2D2D] border-b border-border">
         <img src={logo} alt="PromptHub" className="w-5 h-5 rounded object-contain" />
         <span className="text-xs text-muted-foreground ml-1 font-mono">darmohsin63.txt</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground/50 font-mono">TypeScript JSX</span>
+        </div>
       </div>
       
       {/* Code content - prevent selection, show 10-13 lines */}
