@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export function AnimatedLoader() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center justify-center backdrop-blur-xl bg-background/60 overflow-hidden relative">
       {/* Soft gradient background orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px]" />
