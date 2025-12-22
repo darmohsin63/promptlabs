@@ -188,7 +188,7 @@ const PromptDetail = () => {
                   Prompt
                 </h2>
               </div>
-              <CodeStyledPrompt content={prompt.content} allowCopy={!!user} />
+              <CodeStyledPrompt content={prompt.content} />
               {!user && (
                 <div className="mt-4 p-4 glass-panel text-center">
                   <p className="text-muted-foreground text-sm mb-3">Sign in to copy this prompt</p>
