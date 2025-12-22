@@ -87,17 +87,18 @@ const getColorClass = (word: string) => {
   return tokenColors.default;
 };
 
-// Split content into display lines with blank lines for code feel
+// Split content into display lines with random blank lines for code feel
 const splitIntoDisplayLines = (content: string, wordsPerLine: number = 7): string[] => {
   const words = content.split(/\s+/);
   const lines: string[] = [];
-  let lineCount = 0;
+  let wordIndex = 0;
   
-  for (let i = 0; i < words.length; i += wordsPerLine) {
-    lines.push(words.slice(i, i + wordsPerLine).join(" "));
-    lineCount++;
-    // Add blank line every 3 lines for code feel
-    if (lineCount % 3 === 0 && i + wordsPerLine < words.length) {
+  while (wordIndex < words.length) {
+    lines.push(words.slice(wordIndex, wordIndex + wordsPerLine).join(" "));
+    wordIndex += wordsPerLine;
+    
+    // Add random blank line (roughly 30% chance, but not on last line)
+    if (wordIndex < words.length && Math.random() < 0.3) {
       lines.push("");
     }
   }
@@ -150,11 +151,12 @@ export function CodeStyledPrompt({ content, className = "", allowCopy = true }: 
         <span className="text-xs text-muted-foreground ml-1 font-mono">darmohsin63.txt</span>
       </div>
       
-      {/* Code content with themed background - prevent copy when not allowed */}
+      {/* Code content - always prevent selection and copy */}
       <div 
-        className={`bg-background dark:bg-[#1E1E1E] p-4 max-h-[14rem] overflow-y-auto overflow-x-hidden ${!allowCopy ? 'select-none' : ''}`}
-        onCopy={!allowCopy ? (e) => e.preventDefault() : undefined}
-        onContextMenu={!allowCopy ? (e) => e.preventDefault() : undefined}
+        className="bg-background dark:bg-[#1E1E1E] p-4 max-h-[14rem] overflow-y-auto overflow-x-hidden select-none"
+        style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+        onCopy={(e) => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <pre className="font-mono text-sm leading-relaxed">
           <code className="block">{tokenizedContent}</code>
