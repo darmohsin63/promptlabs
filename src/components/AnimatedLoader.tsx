@@ -2,12 +2,9 @@ import { motion } from "framer-motion";
 
 export function AnimatedLoader() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center backdrop-blur-xl bg-background/60 overflow-hidden relative">
-      {/* Soft gradient background orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-accent/8 rounded-full blur-[120px]" />
-      </div>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-md bg-white/30 dark:bg-black/30 overflow-hidden">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/10 dark:from-black/20 dark:to-black/10" />
 
       {/* Main loader container */}
       <div className="relative z-10 flex flex-col items-center gap-8">
