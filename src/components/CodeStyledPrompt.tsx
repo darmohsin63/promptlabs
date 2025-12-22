@@ -73,42 +73,43 @@ const styleWords = [
   "cane-woven", "handcrafted", "rustic", "contemporary"
 ];
 
+const getColorClass = (word: string) => {
+  const cleanWord = word.toLowerCase().replace(/[.,!?;:()[\]{}'"<>]/g, "");
+  
+  if (actionWords.includes(cleanWord)) return tokenColors.action;
+  if (descriptorWords.includes(cleanWord)) return tokenColors.descriptor;
+  if (objectWords.includes(cleanWord)) return tokenColors.object;
+  if (qualityWords.includes(cleanWord)) return tokenColors.quality;
+  if (connectorWords.includes(cleanWord)) return tokenColors.connector;
+  if (emotionWords.includes(cleanWord)) return tokenColors.emotion;
+  if (styleWords.includes(cleanWord)) return tokenColors.style;
+  return tokenColors.default;
+};
+
+// Split content into display lines (visual only)
+const splitIntoDisplayLines = (content: string, wordsPerLine: number = 6): string[] => {
+  const words = content.split(/\s+/);
+  const lines: string[] = [];
+  
+  for (let i = 0; i < words.length; i += wordsPerLine) {
+    lines.push(words.slice(i, i + wordsPerLine).join(" "));
+  }
+  
+  return lines;
+};
+
 export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptProps) {
+  const displayLines = useMemo(() => splitIntoDisplayLines(content, 6), [content]);
+
   const tokenizedContent = useMemo(() => {
-    const lines = content.split("\n");
-    
-    return lines.map((line, lineIndex) => {
-      // Tokenize the line - split by spaces but keep punctuation attached
-      const tokens: JSX.Element[] = [];
+    return displayLines.map((line, lineIndex) => {
       const words = line.split(/(\s+)/);
       
-      words.forEach((word, wordIndex) => {
-        const cleanWord = word.toLowerCase().replace(/[.,!?;:()[\]{}'"<>]/g, "");
-        let colorClass = tokenColors.default;
-
-        // Check word categories
-        if (actionWords.includes(cleanWord)) {
-          colorClass = tokenColors.action;
-        } else if (descriptorWords.includes(cleanWord)) {
-          colorClass = tokenColors.descriptor;
-        } else if (objectWords.includes(cleanWord)) {
-          colorClass = tokenColors.object;
-        } else if (qualityWords.includes(cleanWord)) {
-          colorClass = tokenColors.quality;
-        } else if (connectorWords.includes(cleanWord)) {
-          colorClass = tokenColors.connector;
-        } else if (emotionWords.includes(cleanWord)) {
-          colorClass = tokenColors.emotion;
-        } else if (styleWords.includes(cleanWord)) {
-          colorClass = tokenColors.style;
-        }
-
-        tokens.push(
-          <span key={wordIndex} className={colorClass}>
-            {word}
-          </span>
-        );
-      });
+      const tokens = words.map((word, wordIndex) => (
+        <span key={wordIndex} className={word.trim() ? getColorClass(word) : ""}>
+          {word}
+        </span>
+      ));
 
       return (
         <div key={lineIndex} className="flex hover:bg-muted/30 dark:hover:bg-white/5 transition-colors">
@@ -119,10 +120,19 @@ export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptPr
         </div>
       );
     });
-  }, [content]);
+  }, [displayLines]);
 
   return (
     <div className={`relative overflow-hidden rounded-xl border border-border shadow-lg ${className}`}>
+      {/* Hidden element for copying original format */}
+      <div 
+        className="absolute -left-[9999px] opacity-0 pointer-events-none"
+        aria-hidden="true"
+        id="prompt-copy-source"
+      >
+        {content}
+      </div>
+
       {/* Title bar with logo */}
       <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/80 dark:bg-[#2D2D2D] border-b border-border">
         <img src={logo} alt="PromptHub" className="w-5 h-5 rounded object-contain" />
@@ -131,7 +141,7 @@ export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptPr
       
       {/* Code content with themed background */}
       <div className="bg-background dark:bg-[#1E1E1E] p-4 max-h-[12rem] overflow-y-auto overflow-x-hidden">
-        <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap break-words">
+        <pre className="font-mono text-sm leading-relaxed">
           <code className="block">{tokenizedContent}</code>
         </pre>
       </div>
