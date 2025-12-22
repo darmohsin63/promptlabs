@@ -134,12 +134,12 @@ export function CodeStyledPrompt({ content, className = "" }: CodeStyledPromptPr
           <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
           <div className="w-3 h-3 rounded-full bg-[#27CA40]" />
         </div>
-        <span className="text-xs text-muted-foreground/70 ml-2 font-mono">prompt.txt</span>
+        <span className="text-xs text-muted-foreground/70 ml-2 font-mono">darmohsin63.txt</span>
       </div>
       
-      {/* Code content */}
-      <div className="bg-[#1E1E1E] p-4 overflow-x-auto">
-        <pre className="font-mono text-sm leading-relaxed">
+      {/* Code content with max height and vertical scroll */}
+      <div className="bg-[#1E1E1E] p-4 max-h-[12rem] overflow-y-auto overflow-x-hidden">
+        <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap break-words">
           <code className="block">{tokenizedContent}</code>
         </pre>
       </div>
