@@ -8,6 +8,7 @@ import { useSavedPrompts } from "@/hooks/useSavedPrompts";
 import { Link as RouterLink } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { ProtectedImage } from "@/components/ProtectedImage";
+import { CodeStyledPrompt } from "@/components/CodeStyledPrompt";
 
 const PromptDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -188,11 +189,7 @@ const PromptDetail = () => {
                 </h2>
               </div>
               {user ? (
-                <div className="glass-panel !p-5 md:!p-6">
-                  <p className="text-foreground whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                    {prompt.content}
-                  </p>
-                </div>
+                <CodeStyledPrompt content={prompt.content} />
               ) : (
                 <div className="glass-panel !p-8 text-center">
                   <p className="text-muted-foreground mb-4">Sign in to view this prompt</p>
