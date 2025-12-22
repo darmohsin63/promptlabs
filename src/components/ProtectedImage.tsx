@@ -11,6 +11,7 @@ interface ProtectedImageProps {
   loading?: "eager" | "lazy";
   decoding?: "sync" | "async" | "auto";
   fetchPriority?: "high" | "low" | "auto";
+  showWatermark?: boolean;
 }
 
 export function ProtectedImage({
@@ -24,6 +25,7 @@ export function ProtectedImage({
   loading,
   decoding,
   fetchPriority,
+  showWatermark = true,
 }: ProtectedImageProps) {
   const [imageError, setImageError] = useState(false);
 
@@ -38,7 +40,7 @@ export function ProtectedImage({
   };
 
   return (
-    <div className="relative select-none">
+    <div className="relative select-none overflow-hidden">
       <img
         src={imageError ? "/placeholder.svg" : src}
         srcSet={imageError ? undefined : srcSet}
@@ -59,9 +61,34 @@ export function ProtectedImage({
           pointerEvents: "none",
         }}
       />
+      
+      {/* Watermark overlay */}
+      {showWatermark && (
+        <div 
+          className="absolute inset-0 z-[1] pointer-events-none overflow-hidden"
+          style={{ 
+            WebkitTouchCallout: "none",
+            WebkitUserSelect: "none",
+            userSelect: "none",
+          }}
+        >
+          <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-8 -rotate-12 scale-150 opacity-[0.08]">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span 
+                key={i} 
+                className="text-foreground font-bold text-lg md:text-2xl whitespace-nowrap tracking-widest"
+                style={{ fontFamily: "system-ui, sans-serif" }}
+              >
+                prompthub
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Invisible overlay to prevent direct interaction */}
       <div 
-        className="absolute inset-0 z-[1]" 
+        className="absolute inset-0 z-[2]" 
         onContextMenu={handleContextMenu}
         onDragStart={handleDragStart}
         style={{ 
