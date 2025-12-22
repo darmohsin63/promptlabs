@@ -73,7 +73,7 @@ export function ProtectedImage({
           }}
         >
           <div 
-            className="absolute -inset-[50%] flex flex-wrap items-center justify-center gap-4 opacity-[0.15]"
+            className="absolute -inset-[50%] flex flex-wrap items-center justify-center gap-4 opacity-[0.25]"
             style={{ 
               transform: "rotate(-30deg)",
             }}
@@ -81,7 +81,7 @@ export function ProtectedImage({
             {Array.from({ length: 50 }).map((_, i) => (
               <span 
                 key={i} 
-                className="text-foreground/80 font-medium text-[10px] whitespace-nowrap tracking-wider uppercase"
+                className="text-white font-medium text-[10px] whitespace-nowrap tracking-wider uppercase"
                 style={{ fontFamily: "system-ui, sans-serif" }}
               >
                 prompthub
