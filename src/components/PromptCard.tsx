@@ -4,7 +4,7 @@ import { Prompt } from "@/hooks/usePrompts";
 import { useSavedPrompts } from "@/hooks/useSavedPrompts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-
+import { ProtectedImage } from "@/components/ProtectedImage";
 interface PromptCardProps {
   prompt: Prompt & { is_approved?: boolean };
   index: number;
@@ -91,7 +91,7 @@ export function PromptCard({ prompt, index, showStatus }: PromptCardProps) {
       )}
 
       <div className="overflow-hidden relative bg-secondary/30 aspect-[4/5]">
-        <img
+        <ProtectedImage
           src={getOptimizedImageUrl(imageUrl, 600)}
           srcSet={srcSet}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

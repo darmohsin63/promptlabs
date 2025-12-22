@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSavedPrompts } from "@/hooks/useSavedPrompts";
 import { Link as RouterLink } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { ProtectedImage } from "@/components/ProtectedImage";
 
 const PromptDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -132,7 +133,7 @@ const PromptDetail = () => {
         <div className="max-w-4xl mx-auto">
           {/* Image */}
           <div className="glass-card overflow-hidden mb-8 animate-scale-in flex justify-center">
-            <img
+            <ProtectedImage
               src={prompt.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60"}
               alt={prompt.title}
               className="max-w-full h-auto max-h-[70vh] object-contain"
