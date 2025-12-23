@@ -1,11 +1,11 @@
-import { Sparkles, Search } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { PromptCard } from "@/components/PromptCard";
 import { PromptCardSkeleton } from "@/components/PromptCardSkeleton";
 import { usePrompts } from "@/hooks/usePrompts";
 import { useFeaturedPrompts } from "@/hooks/useFeaturedPrompts";
-import { FeaturedCarousel } from "@/components/FeaturedCarousel";
+import { HeroSection } from "@/components/HeroSection";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
@@ -28,49 +28,27 @@ const Index = () => {
     );
   });
 
-  const hasFeaturedContent = promptOfDay.length > 0 || trending.length > 0 || creatorsChoice.length > 0;
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header 
+        searchQuery={searchQuery} 
+        onSearchChange={setSearchQuery}
+        showSearch={true}
+      />
 
       {/* Main Content */}
-      <main className="flex-1 pt-20">
-        {/* Search & Title Section */}
-        <section className="py-8 md:py-12">
+      <main className="flex-1">
+        {/* Hero Section with Prompt Core */}
+        <HeroSection
+          promptOfDay={promptOfDay}
+          trending={trending}
+          creatorsChoice={creatorsChoice}
+          loading={featuredLoading}
+        />
+
+        {/* Prompts Grid Section */}
+        <section className="py-12 md:py-16">
           <div className="container px-4">
-            <div className="max-w-2xl mx-auto text-center mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Discover Amazing <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Prompts</span>
-              </h1>
-              <p className="text-muted-foreground mb-6">
-                Browse, copy, and use curated prompts for your creative projects.
-              </p>
-              
-              {/* Search Bar */}
-              <div className="relative max-w-md mx-auto">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search prompts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl pl-12 pr-4 py-3 bg-secondary/50 border border-border/50 text-foreground placeholder:text-muted-foreground transition-all duration-300 focus:outline-none focus:border-primary/50 focus:bg-secondary/80"
-                />
-              </div>
-            </div>
-
-            {/* Featured Carousel Section - Below Search */}
-            {!featuredLoading && hasFeaturedContent && (
-              <div className="mb-8">
-                <FeaturedCarousel
-                  promptOfDay={promptOfDay}
-                  trending={trending}
-                  creatorsChoice={creatorsChoice}
-                />
-              </div>
-            )}
-
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8 px-1">
               <h2 className="text-xl md:text-2xl font-bold text-foreground">

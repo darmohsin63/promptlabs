@@ -1,15 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
-import { LogIn, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { ExpandableSearch } from "@/components/ExpandableSearch";
 import logo from "@/assets/logo.png";
 
-export function Header() {
+interface HeaderProps {
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  showSearch?: boolean;
+}
+
+export function Header({ searchQuery = "", onSearchChange, showSearch = true }: HeaderProps) {
   const location = useLocation();
   const { user, loading } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="glass-header safe-top">
@@ -37,6 +42,14 @@ export function Header() {
             Browse
           </Link>
 
+          {showSearch && onSearchChange && (
+            <ExpandableSearch 
+              value={searchQuery} 
+              onChange={onSearchChange}
+              placeholder="Search prompts..."
+            />
+          )}
+
           <ThemeToggle />
 
           {!loading && (
@@ -56,8 +69,15 @@ export function Header() {
           )}
         </nav>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Nav */}
         <div className="flex md:hidden items-center gap-2">
+          {showSearch && onSearchChange && (
+            <ExpandableSearch 
+              value={searchQuery} 
+              onChange={onSearchChange}
+              placeholder="Search..."
+            />
+          )}
           <ThemeToggle />
           {!loading && user && <ProfileDropdown />}
           {!loading && !user && (
