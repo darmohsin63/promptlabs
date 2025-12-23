@@ -159,8 +159,7 @@ export function DepthMotionHeroCard({
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={`
             relative overflow-hidden rounded-3xl
-            bg-gradient-to-br from-background/95 via-background/90 to-background/85
-            backdrop-blur-xl border border-border/40
+            border border-border/40
             shadow-2xl ${getGlowColor()}
             transition-shadow duration-500
           `}
@@ -168,11 +167,37 @@ export function DepthMotionHeroCard({
             transformStyle: "preserve-3d",
           }}
         >
+          {/* Background image from prompt */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`bg-${activeSection}-${currentIndex}`}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.6 }}
+              className="absolute inset-0"
+            >
+              {currentPrompt?.prompt.image_url ? (
+                <>
+                  <img
+                    src={currentPrompt.prompt.image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Dark overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+                </>
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${getAccentColor()} bg-background`} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
           {/* Light sweep animation */}
           <motion.div
-            className="absolute inset-0 pointer-events-none"
+            className="absolute inset-0 pointer-events-none z-10"
             initial={{ x: "-100%", opacity: 0 }}
-            animate={{ x: ["100%", "-100%"], opacity: [0, 0.3, 0] }}
+            animate={{ x: ["100%", "-100%"], opacity: [0, 0.25, 0] }}
             transition={{
               duration: 2,
               repeat: Infinity,
@@ -180,20 +205,11 @@ export function DepthMotionHeroCard({
               ease: "easeInOut",
             }}
           >
-            <div className="w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+            <div className="w-1/3 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
           </motion.div>
 
-          {/* Subtle accent gradient overlay */}
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className={`absolute inset-0 bg-gradient-to-br ${getAccentColor()} pointer-events-none`}
-          />
-
           {/* Card content */}
-          <div className="relative z-10 px-8 py-10 sm:px-12 sm:py-14">
+          <div className="relative z-20 px-8 py-10 sm:px-12 sm:py-14">
             {/* Section label */}
             <motion.div
               key={activeSection}
@@ -202,7 +218,7 @@ export function DepthMotionHeroCard({
               transition={{ duration: 0.3 }}
               className="flex justify-center mb-4"
             >
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-foreground/5 text-foreground/70">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 backdrop-blur-sm text-white/90 border border-white/10">
                 <Icon className="w-3.5 h-3.5" />
                 {sectionInfo?.label}
               </div>
@@ -220,22 +236,22 @@ export function DepthMotionHeroCard({
               >
                 {currentPrompt ? (
                   <Link to={`/prompt/${currentPrompt.prompt.id}`} className="block group">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight group-hover:text-primary transition-colors duration-300">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 leading-tight group-hover:opacity-90 transition-opacity duration-300 drop-shadow-lg">
                       {currentPrompt.prompt.title}
                     </h2>
-                    <p className="text-sm sm:text-base text-muted-foreground mb-4 line-clamp-2 max-w-md mx-auto leading-relaxed">
+                    <p className="text-sm sm:text-base text-white/80 mb-4 line-clamp-2 max-w-md mx-auto leading-relaxed drop-shadow">
                       {currentPrompt.prompt.description || "Click to explore this prompt"}
                     </p>
-                    <p className="text-xs text-muted-foreground/60">
-                      by <span className="text-foreground/70 font-medium">{currentPrompt.prompt.author}</span>
+                    <p className="text-xs text-white/60">
+                      by <span className="text-white/80 font-medium">{currentPrompt.prompt.author}</span>
                     </p>
                   </Link>
                 ) : (
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 drop-shadow-lg">
                       Discover Prompts
                     </h2>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-white/80 drop-shadow">
                       Hand-crafted AI prompts that actually work
                     </p>
                   </div>
@@ -248,7 +264,7 @@ export function DepthMotionHeroCard({
               <div className="flex justify-center items-center gap-4 mt-6">
                 <button
                   onClick={prevSlide}
-                  className="p-2.5 rounded-full bg-foreground/5 hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-all duration-200"
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all duration-200 backdrop-blur-sm"
                   aria-label="Previous prompt"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -260,8 +276,8 @@ export function DepthMotionHeroCard({
                       onClick={() => setCurrentIndex(idx)}
                       className={`transition-all duration-300 rounded-full ${
                         idx === currentIndex
-                          ? "w-6 h-1.5 bg-primary"
-                          : "w-1.5 h-1.5 bg-muted-foreground/20 hover:bg-muted-foreground/40"
+                          ? "w-6 h-1.5 bg-white"
+                          : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
                       }`}
                       aria-label={`Go to prompt ${idx + 1}`}
                     />
@@ -269,7 +285,7 @@ export function DepthMotionHeroCard({
                 </div>
                 <button
                   onClick={nextSlide}
-                  className="p-2.5 rounded-full bg-foreground/5 hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-all duration-200"
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all duration-200 backdrop-blur-sm"
                   aria-label="Next prompt"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -289,10 +305,10 @@ export function DepthMotionHeroCard({
                   <button
                     key={sectionId}
                     onClick={() => setActiveSection(sectionId)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-300 ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-300 backdrop-blur-sm ${
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                        ? "bg-white text-gray-900 shadow-lg"
+                        : "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white border border-white/10"
                     }`}
                   >
                     <SectionIcon className="w-3.5 h-3.5" />
@@ -304,7 +320,7 @@ export function DepthMotionHeroCard({
           </div>
 
           {/* Bottom soft shadow for depth */}
-          <div className="absolute -bottom-1 left-4 right-4 h-6 bg-gradient-to-t from-foreground/[0.02] to-transparent rounded-b-3xl pointer-events-none" />
+          <div className="absolute -bottom-1 left-4 right-4 h-6 bg-gradient-to-t from-black/20 to-transparent rounded-b-3xl pointer-events-none z-10" />
         </motion.div>
 
         {/* External shadow for depth illusion */}
