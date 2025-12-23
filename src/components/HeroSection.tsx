@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { LivingPromptCanvas } from "./LivingPromptCanvas";
+import { DepthMotionHeroCard } from "./DepthMotionHeroCard";
 import { FeaturedPrompt } from "@/hooks/useFeaturedPrompts";
 
 interface HeroSectionProps {
@@ -13,71 +13,76 @@ export function HeroSection({ promptOfDay, trending, creatorsChoice, loading }: 
   const hasContent = promptOfDay.length > 0 || trending.length > 0 || creatorsChoice.length > 0;
 
   return (
-    <section className="relative min-h-[80vh] md:min-h-[85vh] flex flex-col items-center justify-center overflow-hidden">
-      {/* Clean neutral gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-stone-50 via-background to-background dark:from-stone-950/30 dark:via-background dark:to-background" />
+    <section className="relative min-h-[70vh] md:min-h-[75vh] flex flex-col items-center justify-center overflow-hidden">
+      {/* Clean off-white background with subtle grain */}
+      <div className="absolute inset-0 bg-gradient-to-b from-stone-50/80 via-background to-background dark:from-stone-950/50 dark:via-background dark:to-background" />
+      
+      {/* Subtle grain texture */}
+      <div 
+        className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
-      {/* Subtle depth fog */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_80%)]" />
+      {/* Depth fog */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_75%)]" />
 
       {/* Content container */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pt-20">
-        {/* Headline - above the canvas */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-16 pb-8">
+        {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-          className="text-center mb-4 md:mb-6"
+          transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+          className="text-center mb-8 md:mb-12"
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
             <span className="relative inline-block">
               Hand-crafted
               <motion.span
-                className="absolute -bottom-0.5 left-0 right-0 h-0.5 md:h-1 bg-gradient-to-r from-primary to-accent rounded-full"
-                initial={{ scaleX: 0 }}
+                className="absolute -bottom-0.5 left-0 right-0 h-0.5 md:h-[3px] bg-gradient-to-r from-primary to-primary/60 rounded-full"
+                initial={{ scaleX: 0, originX: 0 }}
                 animate={{ scaleX: 1 }}
-                transition={{ delay: 0.5, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ delay: 0.5, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
               />
             </span>{" "}
             AI{" "}
             <span className="relative inline-block">
               prompts
               <motion.span
-                className="absolute -bottom-0.5 left-0 right-0 h-0.5 md:h-1 bg-gradient-to-r from-accent to-primary rounded-full"
-                initial={{ scaleX: 0 }}
+                className="absolute -bottom-0.5 left-0 right-0 h-0.5 md:h-[3px] bg-gradient-to-r from-primary/60 to-primary rounded-full"
+                initial={{ scaleX: 0, originX: 1 }}
                 animate={{ scaleX: 1 }}
-                transition={{ delay: 0.7, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ delay: 0.7, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
               />
             </span>
             <span className="text-muted-foreground"> that work.</span>
           </h1>
         </motion.div>
 
-        {/* The unified 3D Living Prompt Canvas */}
+        {/* Depth Motion Hero Card */}
         {!loading && hasContent && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            className="relative h-[380px] sm:h-[420px] md:h-[460px]"
-          >
-            <LivingPromptCanvas
-              promptOfDay={promptOfDay}
-              trending={trending}
-              creatorsChoice={creatorsChoice}
-              className="w-full h-full"
-            />
-          </motion.div>
+          <DepthMotionHeroCard
+            promptOfDay={promptOfDay}
+            trending={trending}
+            creatorsChoice={creatorsChoice}
+            className="w-full"
+          />
         )}
 
         {/* Loading state */}
         {loading && (
-          <div className="h-[380px] flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+          <div className="h-[300px] flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
+            />
           </div>
         )}
 
-        {/* Empty state - still show headline only */}
+        {/* Empty state */}
         {!loading && !hasContent && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -95,15 +100,15 @@ export function HeroSection({ promptOfDay, trending, creatorsChoice, loading }: 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 0.5 }}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2"
+        transition={{ delay: 1.2, duration: 0.5 }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2"
       >
         <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="w-5 h-8 rounded-full border border-muted-foreground/20 flex justify-center pt-1.5"
+          animate={{ y: [0, 5, 0] }}
+          transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+          className="w-5 h-8 rounded-full border border-muted-foreground/15 flex justify-center pt-2"
         >
-          <div className="w-0.5 h-1.5 rounded-full bg-muted-foreground/30" />
+          <div className="w-0.5 h-1.5 rounded-full bg-muted-foreground/25" />
         </motion.div>
       </motion.div>
     </section>
