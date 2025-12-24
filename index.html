@@ -27,20 +27,20 @@
     <meta name="google-adsense-account" content="ca-pub-7902425944684753">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7902425944684753" crossorigin="anonymous"></script>
 
-    <!-- AdMaven -->
+    <!-- AdMaven - Loaded dynamically based on ad settings -->
     <meta name="admaven-placement" content="Bqjw9rdn6">
-    <script data-cfasync="false" src="//dcbbwymp1bhlf.cloudfront.net/?wbbcd=1232641" class="admaven-script"></script>
-    <script data-cfasync="false" src="//dcbbwymp1bhlf.cloudfront.net/?wbbcd=1232855" class="admaven-script"></script>
-    <script data-cfasync="false" src="//dcbbwymp1bhlf.cloudfront.net/?wbbcd=1232858" class="admaven-script"></script>
     
     <style>
       /* Hide ads when disabled */
       body.ads-disabled [id*="ad"],
       body.ads-disabled [class*="ad-container"],
       body.ads-disabled iframe[src*="ad"],
-      body.ads-disabled .admaven-ad {
+      body.ads-disabled .admaven-ad,
+      body.ads-disabled div[style*="z-index: 2147483647"],
+      body.ads-disabled div[style*="position: fixed"] {
         display: none !important;
         visibility: hidden !important;
+        pointer-events: none !important;
       }
     </style>
   </head>
