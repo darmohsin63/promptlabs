@@ -47,7 +47,7 @@ const Index = () => {
         />
 
         {/* Prompts Grid Section */}
-        <section className="py-12 md:py-16">
+        <section className="py-6 md:py-8">
           <div className="container px-4">
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8 px-1">
