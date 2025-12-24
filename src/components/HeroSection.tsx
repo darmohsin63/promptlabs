@@ -29,7 +29,7 @@ export function HeroSection({ promptOfDay, trending, creatorsChoice, loading }: 
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_75%)]" />
 
       {/* Content container */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-8 pb-4">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-20 pb-4">
         {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
