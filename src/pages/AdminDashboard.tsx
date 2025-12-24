@@ -14,7 +14,8 @@ import {
   Users,
   Crown,
   MessageSquare,
-  Star
+  Star,
+  Megaphone
 } from "lucide-react";
 
 interface Prompt {
@@ -141,6 +142,14 @@ export default function AdminDashboard() {
       value: "★",
       label: "Featured",
       href: "/admin/featured",
+    },
+    {
+      icon: Megaphone,
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+      value: "📢",
+      label: "Ads",
+      href: "/admin/ads",
     },
   ];
 
