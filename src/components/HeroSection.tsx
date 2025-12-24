@@ -13,7 +13,7 @@ export function HeroSection({ promptOfDay, trending, creatorsChoice, loading }: 
   const hasContent = promptOfDay.length > 0 || trending.length > 0 || creatorsChoice.length > 0;
 
   return (
-    <section className="relative min-h-[70vh] md:min-h-[75vh] flex flex-col items-center justify-center overflow-hidden">
+    <section className="relative min-h-[40vh] md:min-h-[45vh] flex flex-col items-center justify-center overflow-hidden">
       {/* Clean off-white background with subtle grain */}
       <div className="absolute inset-0 bg-gradient-to-b from-stone-50/80 via-background to-background dark:from-stone-950/50 dark:via-background dark:to-background" />
       
@@ -29,13 +29,13 @@ export function HeroSection({ promptOfDay, trending, creatorsChoice, loading }: 
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_75%)]" />
 
       {/* Content container */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-16 pb-8">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-8 pb-4">
         {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-          className="text-center mb-8 md:mb-12"
+          className="text-center mb-6 md:mb-8"
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
             <span className="relative inline-block">
