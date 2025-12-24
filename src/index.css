@@ -504,4 +504,87 @@
       transform: translateX(100%);
     }
   }
+
+  /* Theme Toggle Switch */
+  .theme-toggle-checkbox {
+    display: none;
+  }
+
+  .theme-toggle-switch {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    border-radius: 50%;
+    position: relative;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    line-height: 1;
+    overflow: hidden;
+  }
+
+  .theme-icon {
+    grid-column: 1 / 1;
+    grid-row: 1 / 1;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    z-index: 2;
+    transform-origin: center center;
+    transition:
+      transform 500ms ease,
+      opacity 300ms ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .theme-icon--moon {
+    color: hsl(var(--background));
+    background-color: hsl(var(--foreground));
+    border-radius: 50%;
+  }
+
+  .theme-icon--sun {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+    border-radius: 50%;
+    border: 1px solid hsl(var(--border));
+  }
+
+  .theme-icon--moon,
+  .theme-icon--sun {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+
+  .theme-toggle-checkbox:not(:checked) + .theme-toggle-switch .theme-icon--sun {
+    transform: rotate(360deg) scale(1);
+    opacity: 1;
+  }
+
+  .theme-toggle-checkbox:not(:checked) + .theme-toggle-switch .theme-icon--moon {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+
+  .theme-toggle-checkbox:checked + .theme-toggle-switch .theme-icon--moon {
+    transform: rotate(360deg) scale(1);
+    opacity: 1;
+  }
+
+  .theme-toggle-checkbox:checked + .theme-toggle-switch .theme-icon--sun {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+
+  .theme-toggle-checkbox:active + .theme-toggle-switch {
+    transform: scale(0.94);
+  }
+
+  .theme-icon svg {
+    fill: currentColor !important;
+    width: 24px;
+    height: 24px;
+  }
 }
