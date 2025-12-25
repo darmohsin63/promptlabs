@@ -26,6 +26,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const About = lazy(() => import("./pages/About"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SavedPrompts = lazy(() => import("./pages/SavedPrompts"));
+const Search = lazy(() => import("./pages/Search"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/saved-prompts" element={<SavedPrompts />} />
+                <Route path="/search" element={<Search />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

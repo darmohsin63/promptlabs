@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { usePrompts } from "@/hooks/usePrompts";
 
 interface ExpandableSearchProps {
@@ -34,6 +34,7 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { prompts } = usePrompts();
+  const navigate = useNavigate();
 
   // Filter suggestions based on input
   const suggestions = useMemo(() => {
@@ -79,6 +80,15 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
     setShowSuggestions(true);
   };
 
+  const handleSearch = () => {
+    if (value.trim()) {
+      navigate(`/search?q=${encodeURIComponent(value.trim())}`);
+      setShowSuggestions(false);
+      setIsExpanded(false);
+      onChange("");
+    }
+  };
+
   const handleSuggestionClick = () => {
     setShowSuggestions(false);
     setIsExpanded(false);
@@ -113,6 +123,8 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
                   handleClose();
+                } else if (e.key === "Enter") {
+                  handleSearch();
                 }
               }}
             />
