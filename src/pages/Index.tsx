@@ -41,7 +41,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col hero-gradient">
       <Header 
         searchQuery={searchQuery} 
         onSearchChange={setSearchQuery}
@@ -59,7 +59,10 @@ const Index = () => {
         />
 
         {/* Prompts Grid Section */}
-        <section className="py-6 md:py-8">
+        <section id="prompts" className="py-6 md:py-8 relative">
+          {/* Floating Orbs for depth continuity */}
+          <div className="floating-orb floating-orb-1 opacity-50" />
+          <div className="floating-orb floating-orb-2 opacity-50" />
           <div className="container px-4">
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8 px-1">

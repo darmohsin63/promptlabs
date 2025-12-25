@@ -280,7 +280,7 @@ export function Footer() {
   return (
     <motion.footer 
       ref={footerRef}
-      className="relative mt-16 overflow-hidden"
+      className="relative overflow-hidden"
       style={{ opacity }}
     >
       {/* iOS-style separator with glow */}
@@ -293,13 +293,13 @@ export function Footer() {
         />
       </div>
       
-      {/* Footer content with iOS glassmorphism and 3D depth */}
-      <div className="relative bg-background/70 backdrop-blur-2xl">
+      {/* Footer content with glassmorphism - blends with hero-gradient background */}
+      <div className="relative bg-transparent backdrop-blur-sm">
         {/* Floating Orbs for depth */}
         <FloatingOrbs />
         
-        {/* Gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-foreground/[0.01] to-foreground/[0.03] pointer-events-none" />
+        {/* Subtle gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
         
         <motion.div 
           className="container py-14 px-6 relative z-10"
