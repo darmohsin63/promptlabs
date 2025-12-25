@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 export function HeroSection({}: HeroSectionProps) {
   return (
-    <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden -mb-px">
+    <section className="relative min-h-[100dvh] w-full overflow-hidden -mb-px">
       {/* Background Video */}
       <video
         className="absolute top-0 left-0 w-full h-full object-cover z-0 video-mask-fade"
@@ -31,8 +31,8 @@ export function HeroSection({}: HeroSectionProps) {
         }}
       />
 
-      {/* Content */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-24">
+      {/* Content - Top left positioning */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 pt-24 md:pt-32">
         <div className="flex flex-col items-start">
           <motion.h1
               initial={{ opacity: 0, y: 50 }}
