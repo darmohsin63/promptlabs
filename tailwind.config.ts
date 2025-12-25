@@ -19,6 +19,7 @@ export default {
       fontFamily: {
         sans: ['Space Grotesk', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        audio: ['Audiowide', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
