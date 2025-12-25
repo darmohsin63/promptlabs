@@ -1,5 +1,7 @@
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import { PromptCard } from "@/components/PromptCard";
 import { PromptCardSkeleton } from "@/components/PromptCardSkeleton";
@@ -7,6 +9,7 @@ import { usePrompts } from "@/hooks/usePrompts";
 import { useFeaturedPrompts } from "@/hooks/useFeaturedPrompts";
 import { HeroSection } from "@/components/HeroSection";
 import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,6 +30,9 @@ const Index = () => {
       prompt.author.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
+
+  // Only show latest 6 prompts on home page
+  const latestPrompts = filteredPrompts.slice(0, 6);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -55,7 +61,7 @@ const Index = () => {
                 {searchQuery ? "Search Results" : "Latest Prompts"}
               </h2>
               <span className="text-sm text-muted-foreground bg-secondary/50 rounded-full px-3 py-1">
-                {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? "s" : ""}
+                {latestPrompts.length} of {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? "s" : ""}
               </span>
             </div>
 
@@ -64,9 +70,9 @@ const Index = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <PromptCardSkeleton count={6} />
               </div>
-            ) : filteredPrompts.length > 0 ? (
+            ) : latestPrompts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {filteredPrompts.map((prompt, index) => (
+                {latestPrompts.map((prompt, index) => (
                   <PromptCard key={prompt.id} prompt={prompt} index={index} />
                 ))}
               </div>
@@ -77,6 +83,36 @@ const Index = () => {
                   No prompts found. Try a different search term.
                 </p>
               </div>
+            )}
+
+            {/* View All Button - iOS Glassmorphism Style */}
+            {filteredPrompts.length > 6 && !loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-10 flex justify-center"
+              >
+                <Link to="/prompts">
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative group"
+                  >
+                    {/* Glow Effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    
+                    {/* Button */}
+                    <Button
+                      size="lg"
+                      className="relative backdrop-blur-xl bg-card/60 hover:bg-card/80 border border-border/50 text-foreground rounded-2xl px-8 py-6 text-base font-medium shadow-lg transition-all duration-300"
+                    >
+                      <span>View All {filteredPrompts.length} Prompts</span>
+                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </motion.div>
+                </Link>
+              </motion.div>
             )}
           </div>
         </section>
