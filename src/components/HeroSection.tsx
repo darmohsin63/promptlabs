@@ -34,8 +34,7 @@ export function HeroSection({}: HeroSectionProps) {
       {/* Content */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-24">
         <div className="flex flex-col items-start">
-          <div className="space-y-4">
-            <motion.h1
+          <motion.h1
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
@@ -68,16 +67,6 @@ export function HeroSection({}: HeroSectionProps) {
                 PROMPTS
               </motion.span>
             </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.5, ease: [0.4, 0, 0.2, 1] }}
-              className="text-muted-foreground text-lg md:text-xl font-light leading-relaxed max-w-md"
-            >
-              Discover curated prompts crafted by creators, for creators. Experience the future of AI interaction.
-            </motion.p>
-          </div>
         </div>
       </div>
     </section>
