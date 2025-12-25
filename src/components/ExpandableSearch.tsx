@@ -9,278 +9,135 @@ interface ExpandableSearchProps {
   placeholder?: string;
 }
 
-// Tom cat SVG component with realistic design
-const TomCat = ({ isWalking = false }: { isWalking?: boolean }) => (
-  <svg width="40" height="44" viewBox="0 0 60 66" fill="none">
-    {/* Tail */}
-    <motion.path
-      d="M8 48 Q2 44 4 36 Q6 28 2 22"
-      stroke="#8B9AAB"
-      strokeWidth="4"
-      strokeLinecap="round"
-      fill="none"
-      animate={isWalking ? {
-        d: ["M8 48 Q2 44 4 36 Q6 28 2 22", "M8 48 Q0 42 2 34 Q4 26 0 20", "M8 48 Q4 46 6 38 Q8 30 4 24", "M8 48 Q2 44 4 36 Q6 28 2 22"]
-      } : {
-        d: ["M8 48 Q2 44 4 36 Q6 28 2 22", "M8 48 Q3 43 5 35 Q7 27 3 21", "M8 48 Q2 44 4 36 Q6 28 2 22"]
+// Golden Snitch SVG component
+const GoldenSnitch = ({ isFlying = false }: { isFlying?: boolean }) => (
+  <svg width="40" height="44" viewBox="0 0 80 60" fill="none">
+    {/* Left Wing */}
+    <motion.g
+      animate={isFlying ? { 
+        rotate: [-15, 15, -15],
+        y: [-2, 2, -2]
+      } : { 
+        rotate: [-5, 5, -5]
       }}
-      transition={{ duration: isWalking ? 0.3 : 2.5, repeat: Infinity, ease: "easeInOut" }}
-    />
-
-    {/* Back leg */}
-    <motion.g
-      animate={isWalking ? { rotate: [-15, 25, -15] } : { rotate: [0, 3, 0, -3, 0] }}
-      transition={{ duration: isWalking ? 0.3 : 1.2, repeat: Infinity, ease: "easeInOut" }}
-      style={{ transformOrigin: "18px 52px" }}
+      transition={{ duration: isFlying ? 0.15 : 0.8, repeat: Infinity, ease: "easeInOut" }}
+      style={{ transformOrigin: "32px 30px" }}
     >
-      <path d="M18 52 L14 62" stroke="#8B9AAB" strokeWidth="5" strokeLinecap="round" />
-      <ellipse cx="13" cy="63" rx="4" ry="2.5" fill="#8B9AAB" />
-      <ellipse cx="11" cy="63" rx="1.5" ry="1" fill="#E8E0D8" />
-      <ellipse cx="13" cy="64" rx="1.5" ry="1" fill="#E8E0D8" />
-      <ellipse cx="15" cy="63" rx="1.5" ry="1" fill="#E8E0D8" />
-    </motion.g>
-
-    {/* Front leg */}
-    <motion.g
-      animate={isWalking ? { rotate: [25, -15, 25] } : { rotate: [0, -3, 0, 3, 0] }}
-      transition={{ duration: isWalking ? 0.3 : 1.2, repeat: Infinity, ease: "easeInOut" }}
-      style={{ transformOrigin: "28px 52px" }}
-    >
-      <path d="M28 52 L32 62" stroke="#8B9AAB" strokeWidth="5" strokeLinecap="round" />
-      <ellipse cx="33" cy="63" rx="4" ry="2.5" fill="#8B9AAB" />
-      <ellipse cx="31" cy="63" rx="1.5" ry="1" fill="#E8E0D8" />
-      <ellipse cx="33" cy="64" rx="1.5" ry="1" fill="#E8E0D8" />
-      <ellipse cx="35" cy="63" rx="1.5" ry="1" fill="#E8E0D8" />
-    </motion.g>
-
-    {/* Body */}
-    <motion.ellipse
-      cx="23"
-      cy="46"
-      rx="12"
-      ry="14"
-      fill="#8B9AAB"
-      animate={isWalking ? { scaleY: [1, 0.95, 1], scaleX: [1, 1.02, 1] } : { scaleY: [1, 0.97, 1] }}
-      transition={{ duration: isWalking ? 0.15 : 1.8, repeat: Infinity, ease: "easeInOut" }}
-    />
-    
-    {/* White belly */}
-    <ellipse cx="23" cy="50" rx="7" ry="9" fill="#E8E0D8" />
-    
-    {/* Chest fluff */}
-    <ellipse cx="23" cy="38" rx="5" ry="3" fill="#E8E0D8" />
-
-    {/* Arm holding magnifying glass */}
-    <motion.g
-      animate={isWalking ? { rotate: [5, -5, 5] } : { rotate: [0, 4, 0] }}
-      transition={{ duration: isWalking ? 0.3 : 2, repeat: Infinity, ease: "easeInOut" }}
-      style={{ transformOrigin: "30px 38px" }}
-    >
-      {/* Upper arm */}
-      <path d="M30 38 Q38 30 42 22" stroke="#8B9AAB" strokeWidth="5" strokeLinecap="round" fill="none" />
-      
-      {/* Paw */}
-      <circle cx="43" cy="20" r="4" fill="#E8E0D8" />
-      <circle cx="40" cy="18" r="1.5" fill="#8B9AAB" />
-      <circle cx="43" cy="16" r="1.5" fill="#8B9AAB" />
-      <circle cx="46" cy="18" r="1.5" fill="#8B9AAB" />
-      
-      {/* Magnifying glass handle */}
-      <rect x="46" y="10" width="4" height="14" rx="2" fill="#8B5A2B" transform="rotate(40 48 17)" />
-      <rect x="47" y="11" width="2" height="12" rx="1" fill="#A0724A" transform="rotate(40 48 17)" />
-      
-      {/* Magnifying glass lens */}
-      <motion.g
-        animate={{ scale: [1, 1.06, 1] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <circle cx="54" cy="6" r="8" stroke="#D4AF37" strokeWidth="3" fill="none" />
-        <circle cx="54" cy="6" r="6" fill="#E6F4FF" fillOpacity="0.5" />
-        <path d="M50 3 Q52 1 54 3" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
-      </motion.g>
-    </motion.g>
-
-    {/* Head */}
-    <motion.g
-      animate={isWalking ? { y: [-2, 2, -2], rotate: [-2, 2, -2] } : { y: [0, -2, 0], rotate: [0, 1, 0] }}
-      transition={{ duration: isWalking ? 0.3 : 2, repeat: Infinity, ease: "easeInOut" }}
-      style={{ transformOrigin: "23px 26px" }}
-    >
-      {/* Head base */}
-      <ellipse cx="23" cy="24" rx="14" ry="12" fill="#8B9AAB" />
-      
-      {/* Cheek tufts */}
-      <ellipse cx="10" cy="26" rx="4" ry="5" fill="#8B9AAB" />
-      <ellipse cx="36" cy="26" rx="4" ry="5" fill="#8B9AAB" />
-      <path d="M6 24 L8 22 L10 25" fill="#8B9AAB" />
-      <path d="M40 24 L38 22 L36 25" fill="#8B9AAB" />
-      
-      {/* Left ear */}
-      <path d="M10 16 L12 4 L18 14 Z" fill="#8B9AAB" />
-      <path d="M11 15 L12.5 6 L17 13 Z" fill="#FFB6C1" />
-      
-      {/* Right ear */}
-      <path d="M36 16 L34 4 L28 14 Z" fill="#8B9AAB" />
-      <path d="M35 15 L33.5 6 L29 13 Z" fill="#FFB6C1" />
-      
-      {/* Face/muzzle area */}
-      <ellipse cx="23" cy="28" rx="8" ry="6" fill="#E8E0D8" />
-      
-      {/* Eyes */}
-      <ellipse cx="17" cy="22" rx="4" ry="4.5" fill="#FFFEF5" />
-      <ellipse cx="29" cy="22" rx="4" ry="4.5" fill="#FFFEF5" />
-      
-      {/* Eye color - yellow/green like Tom */}
-      <ellipse cx="17" cy="22.5" rx="2.5" ry="3" fill="#90B040" />
-      <ellipse cx="29" cy="22.5" rx="2.5" ry="3" fill="#90B040" />
-      
-      {/* Pupils */}
-      <motion.ellipse 
-        cx="17" cy="23" rx="1.5" ry="2" fill="#1A1A1A"
-        animate={{ x: [0, 0.5, 0] }}
-        transition={{ duration: 3, repeat: Infinity }}
-      />
-      <motion.ellipse 
-        cx="29" cy="23" rx="1.5" ry="2" fill="#1A1A1A"
-        animate={{ x: [0, 0.5, 0] }}
-        transition={{ duration: 3, repeat: Infinity }}
-      />
-      
-      {/* Eye highlights */}
-      <circle cx="16" cy="21" r="1" fill="white" />
-      <circle cx="28" cy="21" r="1" fill="white" />
-      
-      {/* Eyelids */}
-      <motion.path
-        d="M13 19.5 Q17 18 21 19.5"
-        stroke="#8B9AAB"
+      <path
+        d="M30 28 Q20 18 8 16 Q4 20 6 26 Q10 22 18 24 Q12 26 8 32 Q12 34 18 30 Q12 34 10 40 Q16 40 22 34 Q18 38 18 44 Q24 42 28 36 L32 30"
+        fill="#F5F5DC"
+        stroke="#D4AF37"
         strokeWidth="1"
-        fill="none"
-        animate={{ d: ["M13 19.5 Q17 18 21 19.5", "M13 20 Q17 18.5 21 20", "M13 19.5 Q17 18 21 19.5"] }}
-        transition={{ duration: 4, repeat: Infinity }}
       />
-      <motion.path
-        d="M25 19.5 Q29 18 33 19.5"
-        stroke="#8B9AAB"
-        strokeWidth="1"
-        fill="none"
-        animate={{ d: ["M25 19.5 Q29 18 33 19.5", "M25 20 Q29 18.5 33 20", "M25 19.5 Q29 18 33 19.5"] }}
-        transition={{ duration: 4, repeat: Infinity }}
-      />
-      
-      {/* Nose */}
-      <ellipse cx="23" cy="28" rx="2.5" ry="2" fill="#3D3D3D" />
-      <ellipse cx="22.5" cy="27.5" rx="1" ry="0.5" fill="#5A5A5A" />
-      
-      {/* Mouth */}
-      <path d="M23 30 L23 31.5" stroke="#3D3D3D" strokeWidth="1" />
-      <path d="M20 32 Q23 34 26 32" stroke="#3D3D3D" strokeWidth="1" fill="none" />
-      
-      {/* Whiskers */}
-      <g stroke="#4A4A4A" strokeWidth="0.7">
-        <motion.line 
-          x1="5" y1="25" x2="14" y2="27"
-          animate={{ y1: [25, 24, 25] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        <motion.line 
-          x1="4" y1="28" x2="14" y2="29"
-          animate={{ y1: [28, 27, 28] }}
-          transition={{ duration: 2.2, repeat: Infinity }}
-        />
-        <motion.line 
-          x1="5" y1="31" x2="14" y2="31"
-          animate={{ y1: [31, 30, 31] }}
-          transition={{ duration: 1.8, repeat: Infinity }}
-        />
-        <motion.line 
-          x1="41" y1="25" x2="32" y2="27"
-          animate={{ y1: [25, 24, 25] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        <motion.line 
-          x1="42" y1="28" x2="32" y2="29"
-          animate={{ y1: [28, 27, 28] }}
-          transition={{ duration: 2.2, repeat: Infinity }}
-        />
-        <motion.line 
-          x1="41" y1="31" x2="32" y2="31"
-          animate={{ y1: [31, 30, 31] }}
-          transition={{ duration: 1.8, repeat: Infinity }}
-        />
-      </g>
-      
-      {/* Forehead stripe pattern */}
-      <path d="M19 14 Q23 12 27 14" stroke="#6B7B8C" strokeWidth="1.5" fill="none" />
-      <path d="M20 16 Q23 15 26 16" stroke="#6B7B8C" strokeWidth="1" fill="none" />
+      <path d="M10 20 L16 24" stroke="#E8DCC8" strokeWidth="0.5" />
+      <path d="M10 28 L18 28" stroke="#E8DCC8" strokeWidth="0.5" />
+      <path d="M14 36 L22 32" stroke="#E8DCC8" strokeWidth="0.5" />
     </motion.g>
+
+    {/* Right Wing */}
+    <motion.g
+      animate={isFlying ? { 
+        rotate: [15, -15, 15],
+        y: [-2, 2, -2]
+      } : { 
+        rotate: [5, -5, 5]
+      }}
+      transition={{ duration: isFlying ? 0.15 : 0.8, repeat: Infinity, ease: "easeInOut" }}
+      style={{ transformOrigin: "48px 30px" }}
+    >
+      <path
+        d="M50 28 Q60 18 72 16 Q76 20 74 26 Q70 22 62 24 Q68 26 72 32 Q68 34 62 30 Q68 34 70 40 Q64 40 58 34 Q62 38 62 44 Q56 42 52 36 L48 30"
+        fill="#F5F5DC"
+        stroke="#D4AF37"
+        strokeWidth="1"
+      />
+      <path d="M70 20 L64 24" stroke="#E8DCC8" strokeWidth="0.5" />
+      <path d="M70 28 L62 28" stroke="#E8DCC8" strokeWidth="0.5" />
+      <path d="M66 36 L58 32" stroke="#E8DCC8" strokeWidth="0.5" />
+    </motion.g>
+
+    {/* Snitch Body */}
+    <motion.g
+      animate={isFlying ? { 
+        y: [-3, 3, -3],
+        rotate: [-5, 5, -5]
+      } : { 
+        y: [0, -2, 0],
+        scale: [1, 1.02, 1]
+      }}
+      transition={{ duration: isFlying ? 0.2 : 1.5, repeat: Infinity, ease: "easeInOut" }}
+      style={{ transformOrigin: "40px 30px" }}
+    >
+      {/* Main golden ball */}
+      <circle cx="40" cy="30" r="12" fill="url(#snitchGold)" />
+      
+      {/* Highlight */}
+      <ellipse cx="36" cy="25" rx="4" ry="3" fill="#FFF8DC" opacity="0.6" />
+      <circle cx="34" cy="24" r="2" fill="white" opacity="0.8" />
+      
+      {/* Decorative engravings */}
+      <path d="M32 30 Q40 26 48 30" stroke="#B8860B" strokeWidth="0.8" fill="none" />
+      <path d="M32 32 Q40 36 48 32" stroke="#B8860B" strokeWidth="0.8" fill="none" />
+      <circle cx="40" cy="30" r="8" stroke="#B8860B" strokeWidth="0.5" fill="none" opacity="0.5" />
+      
+      {/* Center gemstone */}
+      <circle cx="40" cy="30" r="2" fill="#8B0000" />
+      <circle cx="39" cy="29" r="0.8" fill="#FF6B6B" opacity="0.8" />
+    </motion.g>
+
+    {/* Gradient definition */}
+    <defs>
+      <radialGradient id="snitchGold" cx="35%" cy="35%" r="60%">
+        <stop offset="0%" stopColor="#FFE55C" />
+        <stop offset="50%" stopColor="#FFD700" />
+        <stop offset="100%" stopColor="#B8860B" />
+      </radialGradient>
+    </defs>
   </svg>
 );
 
-// Small walking Tom for inside search bar
-const WalkingTomSmall = () => (
+// Flying Snitch for inside search bar
+const FlyingSnitch = () => (
   <motion.svg 
     width="24" 
     height="24" 
-    viewBox="0 0 60 66" 
+    viewBox="0 0 80 60" 
     fill="none"
-    animate={{ x: [0, 180] }}
-    transition={{ duration: 2, ease: "linear", repeat: Infinity }}
+    animate={{ x: [0, 160, 0], y: [0, -8, 4, -4, 0] }}
+    transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
   >
-    {/* Simplified walking Tom */}
+    {/* Simplified flying snitch */}
     <motion.g
-      animate={{ y: [0, -2, 0] }}
-      transition={{ duration: 0.15, repeat: Infinity }}
+      animate={{ rotate: [-10, 10, -10] }}
+      transition={{ duration: 0.3, repeat: Infinity }}
+      style={{ transformOrigin: "40px 30px" }}
     >
-      {/* Body */}
-      <ellipse cx="23" cy="46" rx="10" ry="12" fill="#8B9AAB" />
-      <ellipse cx="23" cy="49" rx="6" ry="7" fill="#E8E0D8" />
-      
-      {/* Legs walking */}
-      <motion.g
-        animate={{ rotate: [-20, 20, -20] }}
-        transition={{ duration: 0.2, repeat: Infinity }}
-        style={{ transformOrigin: "18px 54px" }}
-      >
-        <path d="M18 54 L14 64" stroke="#8B9AAB" strokeWidth="4" strokeLinecap="round" />
-        <ellipse cx="13" cy="65" rx="3" ry="2" fill="#8B9AAB" />
-      </motion.g>
-      <motion.g
-        animate={{ rotate: [20, -20, 20] }}
-        transition={{ duration: 0.2, repeat: Infinity }}
-        style={{ transformOrigin: "28px 54px" }}
-      >
-        <path d="M28 54 L32 64" stroke="#8B9AAB" strokeWidth="4" strokeLinecap="round" />
-        <ellipse cx="33" cy="65" rx="3" ry="2" fill="#8B9AAB" />
-      </motion.g>
-      
-      {/* Head */}
-      <motion.g
-        animate={{ rotate: [-3, 3, -3] }}
-        transition={{ duration: 0.2, repeat: Infinity }}
-        style={{ transformOrigin: "23px 30px" }}
-      >
-        <ellipse cx="23" cy="28" rx="12" ry="10" fill="#8B9AAB" />
-        <ellipse cx="23" cy="31" rx="6" ry="5" fill="#E8E0D8" />
-        <path d="M12 20 L14 10 L18 18 Z" fill="#8B9AAB" />
-        <path d="M34 20 L32 10 L28 18 Z" fill="#8B9AAB" />
-        <circle cx="18" cy="26" r="2" fill="#FFFEF5" />
-        <circle cx="28" cy="26" r="2" fill="#FFFEF5" />
-        <circle cx="18" cy="26.5" r="1" fill="#1A1A1A" />
-        <circle cx="28" cy="26.5" r="1" fill="#1A1A1A" />
-        <ellipse cx="23" cy="31" rx="2" ry="1.5" fill="#3D3D3D" />
-      </motion.g>
-      
-      {/* Tail */}
+      {/* Left Wing */}
       <motion.path
-        d="M10 50 Q4 46 6 40"
-        stroke="#8B9AAB"
-        strokeWidth="3"
-        strokeLinecap="round"
-        fill="none"
-        animate={{ d: ["M10 50 Q4 46 6 40", "M10 50 Q6 48 8 42", "M10 50 Q4 46 6 40"] }}
-        transition={{ duration: 0.2, repeat: Infinity }}
+        d="M30 28 Q20 20 10 20 Q14 28 22 30 Q14 32 10 40 Q20 40 30 32"
+        fill="#F5F5DC"
+        stroke="#D4AF37"
+        strokeWidth="1"
+        animate={{ rotate: [-20, 20, -20] }}
+        transition={{ duration: 0.1, repeat: Infinity }}
+        style={{ transformOrigin: "30px 30px" }}
       />
+      
+      {/* Right Wing */}
+      <motion.path
+        d="M50 28 Q60 20 70 20 Q66 28 58 30 Q66 32 70 40 Q60 40 50 32"
+        fill="#F5F5DC"
+        stroke="#D4AF37"
+        strokeWidth="1"
+        animate={{ rotate: [20, -20, 20] }}
+        transition={{ duration: 0.1, repeat: Infinity }}
+        style={{ transformOrigin: "50px 30px" }}
+      />
+      
+      {/* Golden ball */}
+      <circle cx="40" cy="30" r="10" fill="#FFD700" />
+      <ellipse cx="36" cy="26" rx="3" ry="2" fill="#FFF8DC" opacity="0.6" />
+      <circle cx="40" cy="30" r="1.5" fill="#8B0000" />
     </motion.g>
   </motion.svg>
 );
@@ -359,7 +216,7 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
 
   return (
     <div ref={containerRef} className="relative flex items-center h-10">
-      {/* Collapsed: Tom cat with magnifying glass */}
+      {/* Collapsed: Golden Snitch */}
       <AnimatePresence>
         {!isExpanded && !isJumping && (
           <motion.button
@@ -371,12 +228,12 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
             className="relative w-12 h-12 flex items-center justify-center cursor-pointer group"
             aria-label="Open search"
           >
-            <TomCat isWalking={false} />
+            <GoldenSnitch isFlying={false} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Jumping Tom animation */}
+      {/* Flying Snitch animation */}
       <AnimatePresence>
         {isJumping && !isExpanded && (
           <motion.div
@@ -394,12 +251,12 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
               times: [0, 0.5, 1]
             }}
           >
-            <TomCat isWalking={true} />
+            <GoldenSnitch isFlying={true} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Expanded: Search bar with Tom walking inside */}
+      {/* Expanded: Search bar with flying snitch inside */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -421,9 +278,9 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
               transition={{ duration: 0.3 }}
             />
 
-            {/* Walking Tom inside search bar */}
+            {/* Flying Snitch inside search bar */}
             <div className="absolute left-1 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-hidden w-6 h-6">
-              <WalkingTomSmall />
+              <FlyingSnitch />
             </div>
 
             {/* Search input */}
