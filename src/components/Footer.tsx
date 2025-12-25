@@ -22,6 +22,142 @@ const feedbackSchema = z.object({
     .max(2000, "Message must be less than 2000 characters"),
 });
 
+// Hogwarts Castle Silhouette Component
+const HogwartsCastle = () => (
+  <svg
+    viewBox="0 0 1200 200"
+    className="absolute bottom-0 left-0 right-0 w-full h-auto pointer-events-none"
+    preserveAspectRatio="xMidYMax slice"
+  >
+    <defs>
+      <linearGradient id="castleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="0.05" />
+      </linearGradient>
+      <linearGradient id="windowGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#ffd700" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#ff8c00" stopOpacity="0.4" />
+      </linearGradient>
+    </defs>
+    
+    {/* Main Castle Structure */}
+    <g fill="url(#castleGradient)">
+      {/* Left Tower - Astronomy Tower */}
+      <path d="M50,200 L50,120 L40,120 L45,80 L40,80 L55,40 L70,80 L65,80 L70,120 L60,120 L60,200 Z" />
+      <rect x="47" y="130" width="16" height="15" rx="7" fill="url(#windowGlow)" opacity="0.6" />
+      
+      {/* Second Tower */}
+      <path d="M100,200 L100,100 L90,100 L95,70 L90,70 L105,30 L120,70 L115,70 L120,100 L110,100 L110,200 Z" />
+      <rect x="97" y="110" width="16" height="15" rx="7" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="97" y="140" width="16" height="15" rx="7" fill="url(#windowGlow)" opacity="0.7" />
+      
+      {/* Great Hall Section */}
+      <path d="M140,200 L140,130 L180,130 L180,110 L170,110 L175,80 L185,80 L190,60 L195,80 L205,80 L210,110 L200,110 L200,130 L240,130 L240,200 Z" />
+      <rect x="155" y="150" width="20" height="30" rx="10" fill="url(#windowGlow)" opacity="0.6" />
+      <rect x="205" y="150" width="20" height="30" rx="10" fill="url(#windowGlow)" opacity="0.5" />
+      
+      {/* Central Main Tower - Gryffindor Tower */}
+      <path d="M280,200 L280,90 L270,90 L275,60 L265,60 L280,20 L295,10 L310,20 L325,60 L315,60 L320,90 L310,90 L310,200 Z" />
+      <circle cx="295" cy="45" r="8" fill="url(#windowGlow)" opacity="0.8" />
+      <rect x="282" y="100" width="26" height="20" rx="10" fill="url(#windowGlow)" opacity="0.6" />
+      <rect x="282" y="135" width="26" height="20" rx="10" fill="url(#windowGlow)" opacity="0.7" />
+      
+      {/* Bridge Section */}
+      <path d="M340,200 L340,150 L380,150 L380,140 L420,140 L420,150 L460,150 L460,200 Z" />
+      <rect x="360" y="160" width="15" height="20" rx="5" fill="url(#windowGlow)" opacity="0.4" />
+      <rect x="395" y="155" width="15" height="25" rx="5" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="425" y="160" width="15" height="20" rx="5" fill="url(#windowGlow)" opacity="0.4" />
+      
+      {/* Clock Tower */}
+      <path d="M500,200 L500,70 L490,70 L495,50 L485,50 L510,15 L535,50 L525,50 L530,70 L520,70 L520,200 Z" />
+      <circle cx="510" cy="90" r="15" fill="none" stroke="url(#windowGlow)" strokeWidth="2" opacity="0.7" />
+      <line x1="510" y1="90" x2="510" y2="80" stroke="url(#windowGlow)" strokeWidth="2" opacity="0.7" />
+      <line x1="510" y1="90" x2="518" y2="93" stroke="url(#windowGlow)" strokeWidth="2" opacity="0.7" />
+      <rect x="497" y="120" width="26" height="25" rx="10" fill="url(#windowGlow)" opacity="0.6" />
+      
+      {/* Main Building Section */}
+      <path d="M560,200 L560,120 L640,120 L640,200 Z" />
+      <rect x="575" y="140" width="20" height="35" rx="8" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="605" y="140" width="20" height="35" rx="8" fill="url(#windowGlow)" opacity="0.6" />
+      
+      {/* Ravenclaw Tower */}
+      <path d="M680,200 L680,80 L670,80 L675,55 L665,55 L690,10 L715,55 L705,55 L710,80 L700,80 L700,200 Z" />
+      <circle cx="690" cy="40" r="6" fill="url(#windowGlow)" opacity="0.9" />
+      <rect x="677" y="90" width="26" height="20" rx="10" fill="url(#windowGlow)" opacity="0.6" />
+      <rect x="677" y="125" width="26" height="20" rx="10" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="677" y="160" width="26" height="20" rx="10" fill="url(#windowGlow)" opacity="0.7" />
+      
+      {/* Another Bridge */}
+      <path d="M740,200 L740,140 L800,140 L800,200 Z" />
+      <rect x="755" y="155" width="15" height="25" rx="5" fill="url(#windowGlow)" opacity="0.4" />
+      <rect x="780" y="155" width="15" height="25" rx="5" fill="url(#windowGlow)" opacity="0.5" />
+      
+      {/* Hufflepuff Area */}
+      <path d="M840,200 L840,110 L830,110 L835,85 L845,85 L855,60 L865,85 L875,85 L880,110 L870,110 L870,200 Z" />
+      <rect x="842" y="120" width="26" height="20" rx="10" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="842" y="155" width="26" height="25" rx="10" fill="url(#windowGlow)" opacity="0.6" />
+      
+      {/* Library Tower */}
+      <path d="M920,200 L920,90 L910,90 L915,65 L905,65 L930,25 L955,65 L945,65 L950,90 L940,90 L940,200 Z" />
+      <rect x="917" y="100" width="26" height="18" rx="8" fill="url(#windowGlow)" opacity="0.6" />
+      <rect x="917" y="130" width="26" height="18" rx="8" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="917" y="160" width="26" height="18" rx="8" fill="url(#windowGlow)" opacity="0.7" />
+      
+      {/* Right Section */}
+      <path d="M980,200 L980,130 L1040,130 L1040,200 Z" />
+      <rect x="995" y="145" width="15" height="30" rx="6" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="1020" y="145" width="15" height="30" rx="6" fill="url(#windowGlow)" opacity="0.6" />
+      
+      {/* Far Right Tower - Slytherin Dungeon Tower */}
+      <path d="M1080,200 L1080,95 L1070,95 L1075,70 L1065,70 L1090,30 L1115,70 L1105,70 L1110,95 L1100,95 L1100,200 Z" />
+      <rect x="1077" y="105" width="26" height="18" rx="8" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="1077" y="135" width="26" height="18" rx="8" fill="url(#windowGlow)" opacity="0.6" />
+      <rect x="1077" y="165" width="26" height="18" rx="8" fill="url(#windowGlow)" opacity="0.4" />
+      
+      {/* Final Tower */}
+      <path d="M1140,200 L1140,110 L1130,110 L1135,85 L1150,50 L1165,85 L1170,110 L1160,110 L1160,200 Z" />
+      <rect x="1137" y="120" width="26" height="20" rx="8" fill="url(#windowGlow)" opacity="0.5" />
+      <rect x="1137" y="155" width="26" height="25" rx="8" fill="url(#windowGlow)" opacity="0.6" />
+    </g>
+    
+    {/* Ground/Hill */}
+    <path d="M0,200 Q300,180 600,190 Q900,175 1200,200 L1200,220 L0,220 Z" fill="url(#castleGradient)" />
+  </svg>
+);
+
+// Floating Stars Component
+const FloatingStars = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {[...Array(20)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-1 h-1 bg-amber-400/60 rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 60}%`,
+        }}
+        animate={{
+          opacity: [0.3, 1, 0.3],
+          scale: [0.8, 1.2, 0.8],
+        }}
+        transition={{
+          duration: 2 + Math.random() * 2,
+          repeat: Infinity,
+          delay: Math.random() * 2,
+        }}
+      />
+    ))}
+  </div>
+);
+
+// Magic Wand Icon
+const MagicWandIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8l1.4 1.4M17.8 6.2l1.4-1.4M12.2 11.8l-1.4 1.4M3 21l9-9" />
+    <path d="M12.2 6.2l-1.4-1.4" />
+  </svg>
+);
+
 export function Footer() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,12 +252,18 @@ export function Footer() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="relative mt-20"
     >
-      {/* Subtle gradient divider */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+      {/* Magical gradient divider */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
       
-      {/* Footer panel */}
-      <div className="bg-muted/30 rounded-t-3xl md:rounded-t-none">
-        <div className="container py-16 px-6">
+      {/* Footer panel with Hogwarts theme */}
+      <div className="relative bg-gradient-to-b from-muted/30 via-muted/20 to-muted/40 rounded-t-3xl md:rounded-t-none overflow-hidden">
+        {/* Floating Stars */}
+        <FloatingStars />
+        
+        {/* Hogwarts Castle Silhouette */}
+        <HogwartsCastle />
+        
+        <div className="container py-16 px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
             
             {/* Branding Area */}
@@ -135,19 +277,19 @@ export function Footer() {
                   className="h-11 w-auto object-cover transition-transform duration-300 group-hover:scale-[1.02]" 
                 />
               </Link>
-              <p className="text-muted-foreground/70 text-sm leading-relaxed max-w-xs">
-                Hand-crafted AI prompts that work.
+              <p className="text-muted-foreground/70 text-sm leading-relaxed max-w-xs font-serif italic">
+                "It does not do to dwell on dreams and forget to live." — Hand-crafted AI prompts that work.
               </p>
               
-              {/* Social Icons */}
+              {/* Social Icons with magical styling */}
               <div className="flex items-center gap-3 pt-2">
                 <motion.a
                   href={INSTAGRAM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(var(--primary),0.15)]"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-amber-500 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]"
                   aria-label="Follow on Instagram"
                 >
                   <Instagram className="w-[18px] h-[18px]" />
@@ -156,9 +298,9 @@ export function Footer() {
                   href={FACEBOOK_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, rotate: -5 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(var(--primary),0.15)]"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-amber-500 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]"
                   aria-label="Follow on Facebook"
                 >
                   <Facebook className="w-[18px] h-[18px]" />
@@ -166,11 +308,12 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Links Columns */}
+            {/* Links Columns with Harry Potter theming */}
             <div className="md:col-span-4 grid grid-cols-2 gap-8">
-              {/* Explore */}
+              {/* Explore - styled as "Common Room" */}
               <div className="space-y-4">
-                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground/50">
+                <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2">
+                  <MagicWandIcon className="w-3 h-3" />
                   Explore
                 </h4>
                 <ul className="space-y-3">
@@ -178,9 +321,9 @@ export function Footer() {
                     <motion.div variants={linkVariants} initial="initial" whileHover="hover">
                       <Link 
                         to="/" 
-                        className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors duration-200"
+                        className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Home
+                        Great Hall
                       </Link>
                     </motion.div>
                   </li>
@@ -188,19 +331,20 @@ export function Footer() {
                     <motion.div variants={linkVariants} initial="initial" whileHover="hover">
                       <Link 
                         to="/" 
-                        className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors duration-200"
+                        className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Browse Prompts
+                        Browse Spells
                       </Link>
                     </motion.div>
                   </li>
                 </ul>
               </div>
 
-              {/* Company */}
+              {/* Company - styled as "Ministry" */}
               <div className="space-y-4">
-                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground/50">
-                  Company
+                <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2">
+                  <MagicWandIcon className="w-3 h-3" />
+                  Ministry
                 </h4>
                 <ul className="space-y-3">
                   <li>
@@ -208,9 +352,9 @@ export function Footer() {
                       <Link 
                         to="/about" 
                         onClick={() => window.scrollTo(0, 0)}
-                        className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors duration-200"
+                        className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        About
+                        Our Story
                       </Link>
                     </motion.div>
                   </li>
@@ -219,9 +363,9 @@ export function Footer() {
                       <Link 
                         to="/privacy" 
                         onClick={() => window.scrollTo(0, 0)}
-                        className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors duration-200"
+                        className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Privacy Policy
+                        Magical Laws
                       </Link>
                     </motion.div>
                   </li>
@@ -230,9 +374,9 @@ export function Footer() {
                       <Link 
                         to="/terms" 
                         onClick={() => window.scrollTo(0, 0)}
-                        className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors duration-200"
+                        className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Terms of Service
+                        Wizard's Oath
                       </Link>
                     </motion.div>
                   </li>
@@ -240,45 +384,45 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Feedback Section - Unchanged */}
+            {/* Feedback Section - styled as "Owl Post" */}
             <div className="md:col-span-4 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 rounded-2xl blur-xl opacity-60" />
-              <div className="relative backdrop-blur-xl bg-background/40 border border-white/10 rounded-2xl p-5 shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-amber-700/5 rounded-2xl blur-xl opacity-60" />
+              <div className="relative backdrop-blur-xl bg-background/40 border border-amber-500/20 rounded-2xl p-5 shadow-xl shadow-amber-500/5">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
-                    <MessageSquare className="w-4 h-4 text-primary-foreground" />
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700">
+                    <MessageSquare className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="font-semibold text-foreground">Send Feedback</h3>
+                  <h3 className="font-semibold text-foreground font-serif">Owl Post</h3>
                 </div>
                 
                 {user ? (
                   <form onSubmit={handleSubmit} className="space-y-3">
-                    <div className="text-xs text-muted-foreground mb-2 px-1">
-                      Sending as <span className="text-foreground font-medium">{userName || userEmail}</span>
+                    <div className="text-xs text-muted-foreground mb-2 px-1 font-serif italic">
+                      Sending as <span className="text-amber-500 font-medium not-italic">{userName || userEmail}</span>
                     </div>
                     <Textarea
-                      placeholder="Your suggestion or complaint..."
+                      placeholder="Write your magical message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       rows={3}
-                      className="bg-background/50 border-white/10 resize-none focus:border-primary/50 transition-colors"
+                      className="bg-background/50 border-amber-500/20 resize-none focus:border-amber-500/50 transition-colors font-serif"
                     />
                     <Button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                      className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 transition-all text-white"
                       size="sm"
                     >
                       <Send className="w-4 h-4 mr-2" />
-                      {isSubmitting ? "Sending..." : "Send Feedback"}
+                      {isSubmitting ? "Sending Owl..." : "Send by Owl"}
                     </Button>
                   </form>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground mb-3">Sign in to send feedback</p>
+                    <p className="text-sm text-muted-foreground mb-3 font-serif italic">Sign in to send an owl</p>
                     <Link to="/auth">
-                      <Button variant="outline" size="sm" className="border-white/10 hover:bg-white/5">
-                        Sign In
+                      <Button variant="outline" size="sm" className="border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500 font-serif">
+                        Enter the Castle
                       </Button>
                     </Link>
                   </div>
@@ -287,17 +431,17 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Bottom Bar */}
+          {/* Bottom Bar with magical styling */}
           <div className="mt-16 pt-6 relative">
-            {/* Thin divider */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-border/30" />
+            {/* Thin divider with golden accent */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
             
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground/50">
-                © 2025 PromptHub
+              <p className="text-xs text-muted-foreground/50 font-serif">
+                © 2025 PromptHub — Mischief Managed
               </p>
-              <p className="text-xs text-muted-foreground/50 flex items-center gap-1">
-                Made with <Heart className="w-3 h-3 text-destructive/70 fill-destructive/70" /> for creators
+              <p className="text-xs text-muted-foreground/50 flex items-center gap-1 font-serif">
+                Made with <Heart className="w-3 h-3 text-amber-500/70 fill-amber-500/70" /> by wizards
               </p>
             </div>
           </div>
