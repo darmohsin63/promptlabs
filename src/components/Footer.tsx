@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Instagram, Facebook, Heart, Send, MessageSquare } from "lucide-react";
+import { Instagram, Facebook, Heart, Send, MessageSquare, Twitter, Github } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -236,6 +236,179 @@ const MagicWandIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Magical floating orbs around social icons section
+const SocialMagicalOrbs = () => {
+  const orbs = Array.from({ length: 8 }, (_, i) => ({
+    id: i,
+    angle: (i * 45) * (Math.PI / 180),
+    delay: i * 0.15,
+  }));
+
+  return (
+    <>
+      {orbs.map((orb) => (
+        <motion.div
+          key={orb.id}
+          className="absolute w-1.5 h-1.5 rounded-full bg-amber-400/50"
+          style={{
+            left: "50%",
+            top: "50%",
+          }}
+          animate={{
+            x: [
+              Math.cos(orb.angle) * 80,
+              Math.cos(orb.angle + Math.PI) * 80,
+              Math.cos(orb.angle) * 80,
+            ],
+            y: [
+              Math.sin(orb.angle) * 30,
+              Math.sin(orb.angle + Math.PI) * 30,
+              Math.sin(orb.angle) * 30,
+            ],
+            opacity: [0.2, 0.7, 0.2],
+            scale: [0.6, 1.2, 0.6],
+          }}
+          transition={{
+            duration: 5,
+            delay: orb.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </>
+  );
+};
+
+// Extraordinary Animated Social Icon Button
+const MagicalSocialButton = ({ 
+  icon: Icon, 
+  label, 
+  color,
+  href,
+  delay,
+}: { 
+  icon: React.ElementType; 
+  label: string; 
+  color: string;
+  href: string;
+  delay: number;
+}) => {
+  return (
+    <motion.a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative group"
+      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ 
+        delay, 
+        duration: 0.5, 
+        type: "spring", 
+        bounce: 0.4 
+      }}
+      whileHover={{ scale: 1.15, y: -5 }}
+      whileTap={{ scale: 0.95 }}
+      aria-label={label}
+    >
+      {/* Outer magical rotating ring */}
+      <motion.div
+        className="absolute -inset-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{
+          background: `conic-gradient(from 0deg, transparent, ${color}30, transparent, ${color}30, transparent)`,
+        }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+      />
+      
+      {/* Pulsing magical glow */}
+      <motion.div
+        className="absolute -inset-2 rounded-full blur-md"
+        style={{ backgroundColor: `${color}20` }}
+        animate={{
+          scale: [1, 1.4, 1],
+          opacity: [0.2, 0.5, 0.2],
+        }}
+        transition={{
+          duration: 2.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      
+      {/* Inner button container */}
+      <div 
+        className="relative w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border overflow-hidden backdrop-blur-sm"
+        style={{ 
+          backgroundColor: `${color}10`,
+          borderColor: `${color}30`,
+          boxShadow: `0 0 25px ${color}15, inset 0 0 15px ${color}08`,
+        }}
+      >
+        {/* Magical shimmer sweep */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
+          initial={{ x: "-100%" }}
+          animate={{ x: "200%" }}
+          transition={{
+            duration: 2.5,
+            repeat: Infinity,
+            repeatDelay: 1.5,
+            ease: "easeInOut",
+          }}
+        />
+        
+        {/* Sparkle effects */}
+        <motion.div
+          className="absolute top-1 right-1 w-1 h-1 rounded-full"
+          style={{ backgroundColor: color }}
+          animate={{
+            opacity: [0, 1, 0],
+            scale: [0.5, 1, 0.5],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            delay: 0.3,
+          }}
+        />
+        <motion.div
+          className="absolute bottom-2 left-2 w-0.5 h-0.5 rounded-full"
+          style={{ backgroundColor: color }}
+          animate={{
+            opacity: [0, 1, 0],
+            scale: [0.5, 1, 0.5],
+          }}
+          transition={{
+            duration: 1.8,
+            repeat: Infinity,
+            delay: 0.8,
+          }}
+        />
+        
+        {/* Icon */}
+        <Icon 
+          className="w-5 h-5 md:w-6 md:h-6 relative z-10 transition-all duration-300 group-hover:scale-110" 
+          style={{ color }}
+        />
+      </div>
+      
+      {/* Floating label on hover */}
+      <motion.span
+        className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-serif whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 px-2 py-0.5 rounded-full"
+        style={{ 
+          color,
+          backgroundColor: `${color}15`,
+        }}
+      >
+        {label}
+      </motion.span>
+    </motion.a>
+  );
+};
+
 export function Footer() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -345,6 +518,56 @@ export function Footer() {
         <HogwartsCastle />
         
         <div className="container py-16 px-6 relative z-10">
+          
+          {/* CENTERED SOCIAL ICONS WITH EXTRAORDINARY ANIMATIONS */}
+          <div className="flex flex-col items-center justify-center mb-16 relative">
+            <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2 mb-8">
+              <MagicWandIcon className="w-3 h-3" />
+              Connect With Us
+              <MagicWandIcon className="w-3 h-3" />
+            </h4>
+            
+            <div className="relative flex items-center justify-center gap-5 md:gap-8">
+              {/* Magical orbs floating around */}
+              <SocialMagicalOrbs />
+              
+              <MagicalSocialButton
+                icon={Instagram}
+                label="Instagram"
+                color="#E4405F"
+                href={INSTAGRAM_URL}
+                delay={0}
+              />
+              
+              <MagicalSocialButton
+                icon={Facebook}
+                label="Facebook"
+                color="#1877F2"
+                href={FACEBOOK_URL}
+                delay={0.1}
+              />
+              
+              <MagicalSocialButton
+                icon={Twitter}
+                label="Twitter"
+                color="#1DA1F2"
+                href="https://twitter.com/prompthub"
+                delay={0.2}
+              />
+              
+              <MagicalSocialButton
+                icon={Github}
+                label="GitHub"
+                color="#ffffff"
+                href="https://github.com/prompthub"
+                delay={0.3}
+              />
+            </div>
+            
+            {/* Magical divider line */}
+            <div className="mt-12 w-full max-w-2xl mx-auto h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
             
             {/* Branding Area */}
@@ -361,32 +584,6 @@ export function Footer() {
               <p className="text-muted-foreground/70 text-sm leading-relaxed max-w-xs font-serif italic">
                 "It does not do to dwell on dreams and forget to live." — Hand-crafted AI prompts that work.
               </p>
-              
-              {/* Social Icons with magical styling */}
-              <div className="flex items-center gap-3 pt-2">
-                <motion.a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-amber-500 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                  aria-label="Follow on Instagram"
-                >
-                  <Instagram className="w-[18px] h-[18px]" />
-                </motion.a>
-                <motion.a
-                  href={FACEBOOK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05, rotate: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-amber-500 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                  aria-label="Follow on Facebook"
-                >
-                  <Facebook className="w-[18px] h-[18px]" />
-                </motion.a>
-              </div>
             </div>
 
             {/* Links Columns with Harry Potter theming */}
