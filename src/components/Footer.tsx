@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Instagram, Facebook, Heart, Send, MessageSquare, Twitter, Github } from "lucide-react";
+import { Instagram, Facebook, Heart, Send, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -519,55 +519,6 @@ export function Footer() {
         
         <div className="container py-16 px-6 relative z-10">
           
-          {/* CENTERED SOCIAL ICONS WITH EXTRAORDINARY ANIMATIONS */}
-          <div className="flex flex-col items-center justify-center mb-16 relative">
-            <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2 mb-8">
-              <MagicWandIcon className="w-3 h-3" />
-              Connect With Us
-              <MagicWandIcon className="w-3 h-3" />
-            </h4>
-            
-            <div className="relative flex items-center justify-center gap-5 md:gap-8">
-              {/* Magical orbs floating around */}
-              <SocialMagicalOrbs />
-              
-              <MagicalSocialButton
-                icon={Instagram}
-                label="Instagram"
-                color="#E4405F"
-                href={INSTAGRAM_URL}
-                delay={0}
-              />
-              
-              <MagicalSocialButton
-                icon={Facebook}
-                label="Facebook"
-                color="#1877F2"
-                href={FACEBOOK_URL}
-                delay={0.1}
-              />
-              
-              <MagicalSocialButton
-                icon={Twitter}
-                label="Twitter"
-                color="#1DA1F2"
-                href="https://twitter.com/prompthub"
-                delay={0.2}
-              />
-              
-              <MagicalSocialButton
-                icon={Github}
-                label="GitHub"
-                color="#ffffff"
-                href="https://github.com/prompthub"
-                delay={0.3}
-              />
-            </div>
-            
-            {/* Magical divider line */}
-            <div className="mt-12 w-full max-w-2xl mx-auto h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
             
             {/* Branding Area */}
@@ -582,7 +533,7 @@ export function Footer() {
                 />
               </Link>
               <p className="text-muted-foreground/70 text-sm leading-relaxed max-w-xs font-serif italic">
-                "It does not do to dwell on dreams and forget to live." — Hand-crafted AI prompts that work.
+                "Hand-crafted AI prompts that work."
               </p>
             </div>
 
@@ -679,7 +630,7 @@ export function Footer() {
                       Sending as <span className="text-amber-500 font-medium not-italic">{userName || userEmail}</span>
                     </div>
                     <Textarea
-                      placeholder="Write your magical message..."
+                      placeholder="Write your message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       rows={3}
@@ -706,6 +657,36 @@ export function Footer() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* CENTERED SOCIAL ICONS WITH EXTRAORDINARY ANIMATIONS */}
+          <div className="flex flex-col items-center justify-center mt-16 relative">
+            <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2 mb-8">
+              <MagicWandIcon className="w-3 h-3" />
+              Connect With Us
+              <MagicWandIcon className="w-3 h-3" />
+            </h4>
+            
+            <div className="relative flex items-center justify-center gap-5 md:gap-8">
+              {/* Magical orbs floating around */}
+              <SocialMagicalOrbs />
+              
+              <MagicalSocialButton
+                icon={Instagram}
+                label="Instagram"
+                color="#E4405F"
+                href={INSTAGRAM_URL}
+                delay={0}
+              />
+              
+              <MagicalSocialButton
+                icon={Facebook}
+                label="Facebook"
+                color="#1877F2"
+                href={FACEBOOK_URL}
+                delay={0.1}
+              />
             </div>
           </div>
 
