@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden hero-gradient">
       
       {/* Background Video */}
       <video 
@@ -23,11 +23,15 @@ export function HeroSection({ }: HeroSectionProps) {
         <source src="/videos/ai-face.mp4" type="video/mp4" />
       </video>
 
-      {/* Overlay for text readability */}
-      <div className="absolute inset-0 bg-background/40 z-[1]" />
+      {/* Gradient overlay to blend with site theme */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background z-[1]" />
+      
+      {/* Mesh gradient overlay */}
+      <div className="absolute inset-0 z-[2] pointer-events-none" style={{ background: 'var(--gradient-mesh)' }} />
 
-      {/* Gradient Orb */}
-      <div className="absolute bottom-0 left-0 w-64 h-64 md:w-96 md:h-96 bg-primary/30 rounded-full blur-[100px] opacity-40 z-[2]" />
+      {/* Floating Orbs for depth */}
+      <div className="floating-orb floating-orb-1" />
+      <div className="floating-orb floating-orb-2" />
 
       {/* Content Container */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-24">
@@ -83,9 +87,6 @@ export function HeroSection({ }: HeroSectionProps) {
 
         </div>
       </div>
-
-      {/* Bottom gradient fade to blend with content below */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
     </section>
   );
 }
