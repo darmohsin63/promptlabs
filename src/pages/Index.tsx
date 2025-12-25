@@ -62,39 +62,45 @@ const Index = () => {
                 {searchQuery ? "Search Results" : "Latest Prompts"}
               </h2>
               
-              {/* Grid Toggle */}
-              <div className="flex bg-background/60 backdrop-blur-xl border border-border/40 rounded-xl p-1">
+              {/* Grid Toggle - iOS Style like Theme Toggle */}
+              <div className="flex gap-1">
                 <motion.button
                   onClick={() => setGridSize("normal")}
-                  whileTap={{ scale: 0.9 }}
-                  className={`relative h-8 w-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
-                    gridSize === "normal" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                    gridSize === "normal" 
+                      ? "bg-primary/15 text-primary" 
+                      : "bg-foreground/[0.06] hover:bg-foreground/[0.1] text-foreground/80"
                   }`}
+                  aria-label="Normal grid view"
                 >
-                  {gridSize === "normal" && (
-                    <motion.div
-                      layoutId="gridToggleHome"
-                      className="absolute inset-0 bg-primary/15 rounded-lg"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                    />
-                  )}
-                  <LayoutGrid className="w-4 h-4 relative z-10" />
+                  <motion.div
+                    initial={false}
+                    animate={{ scale: gridSize === "normal" ? 1.05 : 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </motion.div>
                 </motion.button>
                 <motion.button
                   onClick={() => setGridSize("compact")}
-                  whileTap={{ scale: 0.9 }}
-                  className={`relative h-8 w-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
-                    gridSize === "compact" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                    gridSize === "compact" 
+                      ? "bg-primary/15 text-primary" 
+                      : "bg-foreground/[0.06] hover:bg-foreground/[0.1] text-foreground/80"
                   }`}
+                  aria-label="Compact grid view"
                 >
-                  {gridSize === "compact" && (
-                    <motion.div
-                      layoutId="gridToggleHome"
-                      className="absolute inset-0 bg-primary/15 rounded-lg"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                    />
-                  )}
-                  <Grid3X3 className="w-4 h-4 relative z-10" />
+                  <motion.div
+                    initial={false}
+                    animate={{ scale: gridSize === "compact" ? 1.05 : 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </motion.div>
                 </motion.button>
               </div>
             </div>
