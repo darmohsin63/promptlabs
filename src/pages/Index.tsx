@@ -1,4 +1,4 @@
-import { Sparkles, ArrowRight, Grid3X3, LayoutGrid } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -10,6 +10,7 @@ import { useFeaturedPrompts } from "@/hooks/useFeaturedPrompts";
 import { HeroSection } from "@/components/HeroSection";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { GridToggle } from "@/components/GridToggle";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,6 +35,10 @@ const Index = () => {
 
   // Only show latest 6 prompts on home page
   const latestPrompts = filteredPrompts.slice(0, 6);
+
+  const toggleGridSize = () => {
+    setGridSize(prev => prev === "normal" ? "compact" : "normal");
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -62,47 +67,8 @@ const Index = () => {
                 {searchQuery ? "Search Results" : "Latest Prompts"}
               </h2>
               
-              {/* Grid Toggle - iOS Style like Theme Toggle */}
-              <div className="flex gap-1">
-                <motion.button
-                  onClick={() => setGridSize("normal")}
-                  whileTap={{ scale: 0.92 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
-                    gridSize === "normal" 
-                      ? "bg-primary/15 text-primary" 
-                      : "bg-foreground/[0.06] hover:bg-foreground/[0.1] text-foreground/80"
-                  }`}
-                  aria-label="Normal grid view"
-                >
-                  <motion.div
-                    initial={false}
-                    animate={{ scale: gridSize === "normal" ? 1.05 : 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </motion.div>
-                </motion.button>
-                <motion.button
-                  onClick={() => setGridSize("compact")}
-                  whileTap={{ scale: 0.92 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
-                    gridSize === "compact" 
-                      ? "bg-primary/15 text-primary" 
-                      : "bg-foreground/[0.06] hover:bg-foreground/[0.1] text-foreground/80"
-                  }`}
-                  aria-label="Compact grid view"
-                >
-                  <motion.div
-                    initial={false}
-                    animate={{ scale: gridSize === "compact" ? 1.05 : 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  >
-                    <Grid3X3 className="w-4 h-4" />
-                  </motion.div>
-                </motion.button>
-              </div>
+              {/* Grid Toggle - Single button like Theme Toggle */}
+              <GridToggle gridSize={gridSize} onToggle={toggleGridSize} />
             </div>
 
             {/* Prompts Grid */}
