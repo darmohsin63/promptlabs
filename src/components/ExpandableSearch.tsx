@@ -74,93 +74,140 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
 
   return (
     <div ref={containerRef} className="relative flex items-center h-8">
-      {/* Collapsed: Animated man with magnifying glass */}
+      {/* Collapsed: Tom cat with magnifying glass */}
       <AnimatePresence>
         {!isExpanded && (
           <motion.button
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            exit={{ opacity: 0, x: 80, scale: 0.6 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
             onClick={() => setIsExpanded(true)}
             className="relative w-10 h-10 flex items-center justify-center cursor-pointer group"
             aria-label="Open search"
           >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 40 40"
-              fill="none"
-              className="text-muted-foreground group-hover:text-foreground transition-colors"
-            >
-              {/* Body */}
+            <svg width="36" height="36" viewBox="0 0 50 50" fill="none">
+              {/* Tom's body - grey blue */}
               <motion.ellipse
-                cx="12"
-                cy="28"
-                rx="5"
-                ry="7"
-                fill="currentColor"
-                animate={{ scaleY: [1, 0.95, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                cx="18"
+                cy="34"
+                rx="8"
+                ry="10"
+                fill="#6B7B8C"
+                animate={{ scaleY: [1, 0.96, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
               
-              {/* Head */}
-              <motion.circle
-                cx="12"
-                cy="16"
-                r="5"
-                fill="currentColor"
-                animate={{ y: [0, -1, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
+              {/* White belly */}
+              <ellipse cx="18" cy="36" rx="5" ry="6" fill="#E8E8E8" />
               
-              {/* Arm holding lens */}
+              {/* Tom's head */}
+              <motion.g
+                animate={{ y: [0, -1.5, 0], rotate: [0, 2, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "18px 20px" }}
+              >
+                {/* Head base */}
+                <ellipse cx="18" cy="18" rx="10" ry="9" fill="#6B7B8C" />
+                
+                {/* Face/muzzle */}
+                <ellipse cx="18" cy="21" rx="6" ry="5" fill="#E8E8E8" />
+                
+                {/* Left ear */}
+                <path d="M8 12 L10 6 L14 11 Z" fill="#6B7B8C" />
+                <path d="M9 11 L10.5 7 L13 10.5 Z" fill="#FFB6C1" />
+                
+                {/* Right ear */}
+                <path d="M28 12 L26 6 L22 11 Z" fill="#6B7B8C" />
+                <path d="M27 11 L25.5 7 L23 10.5 Z" fill="#FFB6C1" />
+                
+                {/* Eyes */}
+                <ellipse cx="14" cy="16" rx="2.5" ry="3" fill="#FFFEF0" />
+                <ellipse cx="22" cy="16" rx="2.5" ry="3" fill="#FFFEF0" />
+                <motion.circle 
+                  cx="14" cy="16.5" r="1.5" fill="#2D2D2D"
+                  animate={{ x: [0, 0.5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <motion.circle 
+                  cx="22" cy="16.5" r="1.5" fill="#2D2D2D"
+                  animate={{ x: [0, 0.5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <circle cx="14.5" cy="15.5" r="0.5" fill="white" />
+                <circle cx="22.5" cy="15.5" r="0.5" fill="white" />
+                
+                {/* Nose */}
+                <ellipse cx="18" cy="21" rx="2" ry="1.5" fill="#3D3D3D" />
+                
+                {/* Whiskers */}
+                <g stroke="#4A4A4A" strokeWidth="0.5">
+                  <line x1="8" y1="19" x2="12" y2="20" />
+                  <line x1="7" y1="22" x2="12" y2="22" />
+                  <line x1="24" y1="20" x2="28" y2="19" />
+                  <line x1="24" y1="22" x2="29" y2="22" />
+                </g>
+                
+                {/* Mouth */}
+                <path d="M16 24 Q18 26 20 24" stroke="#3D3D3D" strokeWidth="0.8" fill="none" />
+              </motion.g>
+              
+              {/* Arm holding magnifying glass */}
+              <motion.g
+                animate={{ rotate: [0, 3, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "24px 28px" }}
+              >
+                {/* Arm */}
+                <path d="M24 28 Q30 22 34 16" stroke="#6B7B8C" strokeWidth="4" strokeLinecap="round" fill="none" />
+                
+                {/* Paw */}
+                <circle cx="34" cy="15" r="3" fill="#E8E8E8" />
+                
+                {/* Magnifying glass handle */}
+                <rect x="36" y="8" width="3" height="10" rx="1" fill="#8B4513" transform="rotate(35 37 13)" />
+                
+                {/* Magnifying glass lens */}
+                <motion.circle
+                  cx="42"
+                  cy="6"
+                  r="6"
+                  stroke="#C4A000"
+                  strokeWidth="2.5"
+                  fill="#E6F3FF"
+                  fillOpacity="0.4"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <path d="M39 4 Q40 3 41 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+              </motion.g>
+              
+              {/* Legs with walking idle */}
+              <motion.g
+                animate={{ rotate: [0, 2, 0, -2, 0] }}
+                transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "14px 42px" }}
+              >
+                <path d="M14 42 L12 48" stroke="#6B7B8C" strokeWidth="4" strokeLinecap="round" />
+                <ellipse cx="11" cy="48" rx="3" ry="1.5" fill="#6B7B8C" />
+              </motion.g>
+              <motion.g
+                animate={{ rotate: [0, -2, 0, 2, 0] }}
+                transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "22px 42px" }}
+              >
+                <path d="M22 42 L24 48" stroke="#6B7B8C" strokeWidth="4" strokeLinecap="round" />
+                <ellipse cx="25" cy="48" rx="3" ry="1.5" fill="#6B7B8C" />
+              </motion.g>
+              
+              {/* Tail */}
               <motion.path
-                d="M16 22 Q22 18 26 14"
-                stroke="currentColor"
-                strokeWidth="2.5"
+                d="M10 38 Q4 36 6 30 Q8 26 5 24"
+                stroke="#6B7B8C"
+                strokeWidth="3"
                 strokeLinecap="round"
                 fill="none"
-                animate={{ rotate: [0, 2, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                style={{ transformOrigin: "16px 22px" }}
-              />
-              
-              {/* Magnifying glass lens */}
-              <motion.circle
-                cx="30"
-                cy="10"
-                r="6"
-                stroke="currentColor"
-                strokeWidth="2"
-                fill="none"
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  rotate: [0, 5, 0]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                style={{ transformOrigin: "30px 10px" }}
-              />
-              
-              {/* Lens shine */}
-              <motion.path
-                d="M27 7 Q28 6 29 7"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-                opacity="0.5"
-                animate={{ opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
-              
-              {/* Legs */}
-              <motion.path
-                d="M10 34 L9 38 M14 34 L15 38"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                animate={{ x: [0, 0.5, 0, -0.5, 0] }}
+                animate={{ d: ["M10 38 Q4 36 6 30 Q8 26 5 24", "M10 38 Q3 34 5 28 Q7 24 4 22", "M10 38 Q4 36 6 30 Q8 26 5 24"] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
             </svg>
