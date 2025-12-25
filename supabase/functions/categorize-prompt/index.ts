@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.88.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,6 +12,57 @@ serve(async (req) => {
   }
 
   try {
+    // Server-side authentication and authorization
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error("Missing authorization header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify user token and get user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error("Auth error:", authError?.message || "No user found");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user has admin, pro, or super_admin role
+    const { data: roles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    if (rolesError) {
+      console.error("Roles fetch error:", rolesError.message);
+      return new Response(
+        JSON.stringify({ error: "Failed to verify permissions" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const allowedRoles = ['admin', 'pro', 'super_admin'];
+    const hasPermission = roles?.some(r => allowedRoles.includes(r.role));
+    
+    if (!hasPermission) {
+      console.error("User lacks required role:", user.id);
+      return new Response(
+        JSON.stringify({ error: "Forbidden - insufficient permissions" }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { title, content, description, imageUrls } = await req.json();
     
     if (!content && !title && (!imageUrls || imageUrls.length === 0)) {
@@ -91,7 +143,7 @@ Respond with ONLY the category names separated by commas.`;
       console.log(`Analyzing ${imagesToAnalyze.length} images for categorization`);
     }
 
-    console.log("Categorizing prompt:", title, "hasImages:", hasImages);
+    console.log("Categorizing prompt:", title, "hasImages:", hasImages, "userId:", user.id);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
