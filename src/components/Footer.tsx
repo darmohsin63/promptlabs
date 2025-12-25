@@ -519,10 +519,10 @@ export function Footer() {
             
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground/50 font-serif">
-                © 2025 PromptHub — Mischief Managed
+                © 2025 PromptHub. All rights reserved.
               </p>
               <p className="text-xs text-muted-foreground/50 flex items-center gap-1 font-serif">
-                Made with <Heart className="w-3 h-3 text-amber-500/70 fill-amber-500/70" /> by wizards
+                Made with <Heart className="w-3 h-3 text-amber-500/70 fill-amber-500/70" /> by the team
               </p>
             </div>
           </div>
