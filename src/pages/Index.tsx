@@ -41,15 +41,19 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col hero-gradient">
-      <Header 
-        searchQuery={searchQuery} 
-        onSearchChange={setSearchQuery}
-        showSearch={true}
-      />
+    <div className="relative hero-gradient">
+      {/* Unifying tint overlay so hero + body + footer feel like one surface */}
+      <div className="pointer-events-none absolute inset-0 z-0 bg-background/35" />
 
-      {/* Main Content */}
-      <main className="flex-1">
+      <div className="relative z-10 min-h-screen flex flex-col">
+        <Header 
+          searchQuery={searchQuery} 
+          onSearchChange={setSearchQuery}
+          showSearch={true}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1">
         {/* Hero Section with Prompt Core */}
         <HeroSection
           promptOfDay={promptOfDay}
@@ -60,9 +64,6 @@ const Index = () => {
 
         {/* Prompts Grid Section */}
         <section id="prompts" className="py-6 md:py-8 relative">
-          {/* Floating Orbs for depth continuity */}
-          <div className="floating-orb floating-orb-1 opacity-50" />
-          <div className="floating-orb floating-orb-2 opacity-50" />
           <div className="container px-4">
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8 px-1">
@@ -133,9 +134,10 @@ const Index = () => {
             )}
           </div>
         </section>
-      </main>
+        </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 };

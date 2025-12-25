@@ -497,6 +497,12 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* Video fades out to page background to avoid hard seams */
+  .video-mask-fade {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  }
+
   /* 3D perspective container */
   .perspective-container {
     perspective: 1000px;
