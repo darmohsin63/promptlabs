@@ -154,13 +154,18 @@
     transform: translateY(-4px) rotateX(2deg);
   }
 
-  /* Glass Header */
+  /* Glass Header - iOS Glassmorphism */
   .glass-header {
     @apply fixed top-0 left-0 right-0 z-50;
-    background: hsl(var(--glass-bg));
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border-bottom: 1px solid hsl(var(--glass-border));
+    background: hsl(var(--background) / 0.72);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-bottom: 0.5px solid hsl(var(--foreground) / 0.08);
+  }
+
+  .dark .glass-header {
+    background: hsl(var(--background) / 0.65);
+    border-bottom: 0.5px solid hsl(0 0% 100% / 0.06);
   }
 
   /* Prompt Card - 3D Glass */
