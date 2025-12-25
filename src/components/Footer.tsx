@@ -150,6 +150,84 @@ const FloatingStars = () => (
   </div>
 );
 
+// Flying Owl with Letter Component
+const FlyingOwl = ({ delay, startX, duration }: { delay: number; startX: number; duration: number }) => (
+  <motion.div
+    className="absolute pointer-events-none"
+    initial={{ x: startX, y: 80, opacity: 0 }}
+    animate={{
+      x: [startX, startX + 400, startX + 800, startX + 1200],
+      y: [80, 40, 60, 30],
+      opacity: [0, 1, 1, 0],
+    }}
+    transition={{
+      duration: duration,
+      repeat: Infinity,
+      delay: delay,
+      ease: "linear",
+    }}
+  >
+    {/* Owl Body */}
+    <svg viewBox="0 0 60 50" className="w-12 h-10" fill="none">
+      {/* Wings - animated flutter */}
+      <motion.path
+        d="M15 25 Q5 15 8 25 Q5 35 15 25"
+        fill="hsl(var(--foreground))"
+        opacity="0.6"
+        animate={{ d: ["M15 25 Q5 15 8 25 Q5 35 15 25", "M15 25 Q5 20 8 25 Q5 30 15 25", "M15 25 Q5 15 8 25 Q5 35 15 25"] }}
+        transition={{ duration: 0.3, repeat: Infinity }}
+      />
+      <motion.path
+        d="M45 25 Q55 15 52 25 Q55 35 45 25"
+        fill="hsl(var(--foreground))"
+        opacity="0.6"
+        animate={{ d: ["M45 25 Q55 15 52 25 Q55 35 45 25", "M45 25 Q55 20 52 25 Q55 30 45 25", "M45 25 Q55 15 52 25 Q55 35 45 25"] }}
+        transition={{ duration: 0.3, repeat: Infinity }}
+      />
+      {/* Body */}
+      <ellipse cx="30" cy="28" rx="12" ry="14" fill="hsl(var(--foreground))" opacity="0.5" />
+      {/* Head */}
+      <circle cx="30" cy="16" r="10" fill="hsl(var(--foreground))" opacity="0.6" />
+      {/* Ears/Tufts */}
+      <path d="M22 10 L24 6 L26 12" fill="hsl(var(--foreground))" opacity="0.5" />
+      <path d="M38 10 L36 6 L34 12" fill="hsl(var(--foreground))" opacity="0.5" />
+      {/* Eyes */}
+      <circle cx="26" cy="15" r="4" fill="#ffd700" opacity="0.9" />
+      <circle cx="34" cy="15" r="4" fill="#ffd700" opacity="0.9" />
+      <circle cx="26" cy="15" r="2" fill="hsl(var(--background))" />
+      <circle cx="34" cy="15" r="2" fill="hsl(var(--background))" />
+      {/* Beak */}
+      <path d="M28 19 L30 23 L32 19" fill="#ff8c00" opacity="0.8" />
+      {/* Feet holding letter */}
+      <path d="M26 40 L26 45 M28 40 L28 45" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.5" />
+      <path d="M32 40 L32 45 M34 40 L34 45" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.5" />
+    </svg>
+    {/* Letter */}
+    <motion.div
+      className="absolute top-8 left-1/2 -translate-x-1/2"
+      animate={{ rotate: [-5, 5, -5] }}
+      transition={{ duration: 0.5, repeat: Infinity }}
+    >
+      <svg viewBox="0 0 24 18" className="w-6 h-5">
+        <rect x="1" y="1" width="22" height="16" rx="1" fill="#f5e6d3" stroke="#8b7355" strokeWidth="0.5" />
+        <path d="M1 2 L12 10 L23 2" stroke="#8b7355" strokeWidth="0.5" fill="none" />
+        {/* Wax seal */}
+        <circle cx="12" cy="14" r="3" fill="#8b0000" />
+        <text x="12" y="15.5" textAnchor="middle" fontSize="4" fill="#ffd700" fontWeight="bold">H</text>
+      </svg>
+    </motion.div>
+  </motion.div>
+);
+
+// Flying Owls Container
+const FlyingOwls = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <FlyingOwl delay={0} startX={-100} duration={12} />
+    <FlyingOwl delay={4} startX={-150} duration={15} />
+    <FlyingOwl delay={8} startX={-80} duration={10} />
+  </div>
+);
+
 // Magic Wand Icon
 const MagicWandIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
@@ -260,6 +338,9 @@ export function Footer() {
         {/* Floating Stars */}
         <FloatingStars />
         
+        {/* Flying Owls */}
+        <FlyingOwls />
+        
         {/* Hogwarts Castle Silhouette */}
         <HogwartsCastle />
         
@@ -310,7 +391,7 @@ export function Footer() {
 
             {/* Links Columns with Harry Potter theming */}
             <div className="md:col-span-4 grid grid-cols-2 gap-8">
-              {/* Explore - styled as "Common Room" */}
+              {/* Explore */}
               <div className="space-y-4">
                 <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2">
                   <MagicWandIcon className="w-3 h-3" />
@@ -323,28 +404,28 @@ export function Footer() {
                         to="/" 
                         className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Great Hall
+                        Home
                       </Link>
                     </motion.div>
                   </li>
                   <li>
                     <motion.div variants={linkVariants} initial="initial" whileHover="hover">
                       <Link 
-                        to="/" 
+                        to="/search" 
                         className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Browse Spells
+                        Browse
                       </Link>
                     </motion.div>
                   </li>
                 </ul>
               </div>
 
-              {/* Company - styled as "Ministry" */}
+              {/* Company */}
               <div className="space-y-4">
                 <h4 className="text-xs font-medium uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 flex items-center gap-2">
                   <MagicWandIcon className="w-3 h-3" />
-                  Ministry
+                  Company
                 </h4>
                 <ul className="space-y-3">
                   <li>
@@ -354,7 +435,7 @@ export function Footer() {
                         onClick={() => window.scrollTo(0, 0)}
                         className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Our Story
+                        About
                       </Link>
                     </motion.div>
                   </li>
@@ -365,7 +446,7 @@ export function Footer() {
                         onClick={() => window.scrollTo(0, 0)}
                         className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Magical Laws
+                        Privacy
                       </Link>
                     </motion.div>
                   </li>
@@ -376,7 +457,7 @@ export function Footer() {
                         onClick={() => window.scrollTo(0, 0)}
                         className="text-sm text-muted-foreground/70 hover:text-amber-500 transition-colors duration-200 font-serif"
                       >
-                        Wizard's Oath
+                        Terms
                       </Link>
                     </motion.div>
                   </li>
@@ -384,7 +465,7 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Feedback Section - styled as "Owl Post" */}
+            {/* Feedback Section */}
             <div className="md:col-span-4 relative">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-amber-700/5 rounded-2xl blur-xl opacity-60" />
               <div className="relative backdrop-blur-xl bg-background/40 border border-amber-500/20 rounded-2xl p-5 shadow-xl shadow-amber-500/5">
@@ -392,7 +473,7 @@ export function Footer() {
                   <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700">
                     <MessageSquare className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="font-semibold text-foreground font-serif">Owl Post</h3>
+                  <h3 className="font-semibold text-foreground font-serif">Contact Us</h3>
                 </div>
                 
                 {user ? (
@@ -414,15 +495,15 @@ export function Footer() {
                       size="sm"
                     >
                       <Send className="w-4 h-4 mr-2" />
-                      {isSubmitting ? "Sending Owl..." : "Send by Owl"}
+                      {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
                   </form>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground mb-3 font-serif italic">Sign in to send an owl</p>
+                    <p className="text-sm text-muted-foreground mb-3 font-serif italic">Sign in to send feedback</p>
                     <Link to="/auth">
                       <Button variant="outline" size="sm" className="border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500 font-serif">
-                        Enter the Castle
+                        Sign In
                       </Button>
                     </Link>
                   </div>
