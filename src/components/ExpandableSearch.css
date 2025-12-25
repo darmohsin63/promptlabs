@@ -6,23 +6,24 @@
 .search-form {
   position: relative;
   width: 100%;
-  max-width: 14em;
+  max-width: 13em;
 }
 
 .search-input,
 .search-caret {
   display: block;
   transition: all 0.5s linear;
+  margin: auto;
 }
 
 .search-input {
   background: transparent;
   border-radius: 50%;
-  box-shadow: 0 0 0 0.15em hsl(var(--foreground)) inset;
+  box-shadow: 0 0 0 0.125em hsl(var(--foreground)) inset;
   caret-color: hsl(var(--primary));
   color: hsl(var(--foreground));
-  width: 1.5em;
-  height: 1.5em;
+  width: 1.25em;
+  height: 1.25em;
   font-size: 0.875rem;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -47,8 +48,8 @@
 .search-input:focus,
 .search-input:valid {
   background: hsl(var(--muted) / 0.6);
-  border-radius: 0.5em;
-  box-shadow: 0 0 0 1px hsl(var(--border)) inset;
+  border-radius: 0.25em;
+  box-shadow: none;
   padding: 0.5em 0.75em;
   transition-duration: 0.25s;
   transition-delay: 0.25s;
@@ -59,7 +60,6 @@
 .search-input:focus {
   animation: showCaret 1s steps(1);
   outline: transparent;
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3) inset;
 }
 
 .search-input:focus + .search-caret,
@@ -68,7 +68,7 @@
   background: transparent;
   width: 1px;
   height: 1em;
-  transform: translate(0, -0.75em) rotate(-180deg) translate(6em, -0.25em);
+  transform: translate(0, -0.625em) rotate(-180deg) translate(4.75em, -0.15em);
 }
 
 .search-input::-webkit-search-decoration,
@@ -87,11 +87,11 @@
 
 .search-caret {
   background: hsl(var(--foreground));
-  border-radius: 0 0 0.1em 0.1em;
-  margin-bottom: -0.4em;
-  width: 0.15em;
-  height: 0.6em;
-  transform: translate(0, -0.75em) rotate(-45deg) translate(0, 0.5em);
+  border-radius: 0 0 0.0625em 0.0625em;
+  margin-bottom: -0.375em;
+  width: 0.125em;
+  height: 0.625em;
+  transform: translate(0, -0.625em) rotate(-45deg) translate(0, 0.55em);
   transform-origin: 50% 0;
   pointer-events: none;
 }
@@ -103,6 +103,47 @@
   }
   to {
     caret-color: hsl(var(--primary));
+  }
+}
+
+@keyframes handleToCaret {
+  from {
+    background: hsl(var(--foreground));
+    width: 0.125em;
+    height: 0.625em;
+    transform: translate(0, -0.625em) rotate(-45deg) translate(0, 0.55em);
+  }
+  25% {
+    background: hsl(var(--foreground));
+    width: 0.125em;
+    height: 0.625em;
+    transform: translate(0, -0.625em) rotate(-180deg) translate(0, 0.55em);
+  }
+  50%,
+  62.5% {
+    background: hsl(var(--primary));
+    width: 1px;
+    height: 1em;
+    transform: translate(0, -0.625em) rotate(-180deg) translate(4.75em, 1.5em);
+  }
+  75%,
+  99% {
+    background: hsl(var(--primary));
+    width: 1px;
+    height: 1em;
+    transform: translate(0, -0.625em) rotate(-180deg) translate(4.75em, -0.15em);
+  }
+  87.5% {
+    background: hsl(var(--primary));
+    width: 1px;
+    height: 1em;
+    transform: translate(0, -0.625em) rotate(-180deg) translate(4.75em, 0.1em);
+  }
+  to {
+    background: transparent;
+    width: 1px;
+    height: 1em;
+    transform: translate(0, -0.625em) rotate(-180deg) translate(4.75em, -0.15em);
   }
 }
 
