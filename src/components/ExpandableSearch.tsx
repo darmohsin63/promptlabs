@@ -74,7 +74,7 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
 
   return (
     <div ref={containerRef} className="relative flex items-center h-8">
-      {/* Collapsed: Magnifying glass icon */}
+      {/* Collapsed: Animated man with magnifying glass */}
       <AnimatePresence>
         {!isExpanded && (
           <motion.button
@@ -83,24 +83,87 @@ export function ExpandableSearch({ value, onChange, placeholder = "Search prompt
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={() => setIsExpanded(true)}
-            className="relative w-8 h-8 flex items-center justify-center cursor-pointer"
+            className="relative w-10 h-10 flex items-center justify-center cursor-pointer group"
             aria-label="Open search"
           >
-            {/* Lens circle */}
-            <motion.div
-              className="absolute w-[18px] h-[18px] rounded-full border-[1.5px] border-current text-muted-foreground"
-              style={{ top: "6px", left: "5px" }}
-            />
-            {/* Handle */}
-            <motion.div
-              className="absolute w-[1.5px] h-[7px] bg-current text-muted-foreground rounded-full"
-              style={{ 
-                top: "18px", 
-                left: "20px",
-                transformOrigin: "top center",
-                transform: "rotate(-45deg)"
-              }}
-            />
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 40 40"
+              fill="none"
+              className="text-muted-foreground group-hover:text-foreground transition-colors"
+            >
+              {/* Body */}
+              <motion.ellipse
+                cx="12"
+                cy="28"
+                rx="5"
+                ry="7"
+                fill="currentColor"
+                animate={{ scaleY: [1, 0.95, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              {/* Head */}
+              <motion.circle
+                cx="12"
+                cy="16"
+                r="5"
+                fill="currentColor"
+                animate={{ y: [0, -1, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              {/* Arm holding lens */}
+              <motion.path
+                d="M16 22 Q22 18 26 14"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                fill="none"
+                animate={{ rotate: [0, 2, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "16px 22px" }}
+              />
+              
+              {/* Magnifying glass lens */}
+              <motion.circle
+                cx="30"
+                cy="10"
+                r="6"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 5, 0]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "30px 10px" }}
+              />
+              
+              {/* Lens shine */}
+              <motion.path
+                d="M27 7 Q28 6 29 7"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                fill="none"
+                opacity="0.5"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              {/* Legs */}
+              <motion.path
+                d="M10 34 L9 38 M14 34 L15 38"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                animate={{ x: [0, 0.5, 0, -0.5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </svg>
           </motion.button>
         )}
       </AnimatePresence>
