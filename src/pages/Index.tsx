@@ -1,4 +1,4 @@
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, Grid3X3, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [gridSize, setGridSize] = useState<"normal" | "compact">("normal");
   const { prompts, loading } = usePrompts();
   const { promptOfDay, trending, creatorsChoice, loading: featuredLoading } = useFeaturedPrompts();
 
@@ -60,18 +61,59 @@ const Index = () => {
               <h2 className="text-xl md:text-2xl font-bold text-foreground">
                 {searchQuery ? "Search Results" : "Latest Prompts"}
               </h2>
-              <span className="text-sm text-muted-foreground bg-secondary/50 rounded-full px-3 py-1">
-                {latestPrompts.length} of {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? "s" : ""}
-              </span>
+              
+              {/* Grid Toggle */}
+              <div className="flex bg-background/60 backdrop-blur-xl border border-border/40 rounded-xl p-1">
+                <motion.button
+                  onClick={() => setGridSize("normal")}
+                  whileTap={{ scale: 0.9 }}
+                  className={`relative h-8 w-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                    gridSize === "normal" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {gridSize === "normal" && (
+                    <motion.div
+                      layoutId="gridToggleHome"
+                      className="absolute inset-0 bg-primary/15 rounded-lg"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
+                  <LayoutGrid className="w-4 h-4 relative z-10" />
+                </motion.button>
+                <motion.button
+                  onClick={() => setGridSize("compact")}
+                  whileTap={{ scale: 0.9 }}
+                  className={`relative h-8 w-8 rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                    gridSize === "compact" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {gridSize === "compact" && (
+                    <motion.div
+                      layoutId="gridToggleHome"
+                      className="absolute inset-0 bg-primary/15 rounded-lg"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
+                  <Grid3X3 className="w-4 h-4 relative z-10" />
+                </motion.button>
+              </div>
             </div>
 
             {/* Prompts Grid */}
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className={`grid gap-4 md:gap-6 ${
+                gridSize === "compact" 
+                  ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" 
+                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              }`}>
                 <PromptCardSkeleton count={6} />
               </div>
             ) : latestPrompts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className={`grid gap-4 md:gap-6 ${
+                gridSize === "compact" 
+                  ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" 
+                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              }`}>
                 {latestPrompts.map((prompt, index) => (
                   <PromptCard key={prompt.id} prompt={prompt} index={index} />
                 ))}
@@ -107,7 +149,7 @@ const Index = () => {
                       size="lg"
                       className="relative backdrop-blur-xl bg-card/60 hover:bg-card/80 border border-border/50 text-foreground rounded-2xl px-8 py-6 text-base font-medium shadow-lg transition-all duration-300"
                     >
-                      <span>View All {filteredPrompts.length} Prompts</span>
+                      <span>View All Prompts</span>
                       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>
