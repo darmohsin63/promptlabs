@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -18,20 +18,66 @@ export default function Auth() {
   const [displayName, setDisplayName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isOAuthCallbackLoading, setIsOAuthCallbackLoading] = useState(false);
   const { signIn, signUp, user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  const oauthLoading = isGoogleLoading || isOAuthCallbackLoading;
+
+  // Handle OAuth callback explicitly (prevents landing back on /auth without session)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    const errorDescription = params.get("error_description") || params.get("error");
+    if (errorDescription) {
+      toast({
+        title: "Google sign in failed",
+        description: decodeURIComponent(errorDescription),
+        variant: "destructive",
+      });
+      navigate("/auth", { replace: true });
+      return;
+    }
+
+    const code = params.get("code");
+    if (!code) return;
+
+    let cancelled = false;
+    (async () => {
+      setIsOAuthCallbackLoading(true);
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (cancelled) return;
+
+      if (error) {
+        toast({
+          title: "Google sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+
+      // Clear URL params; redirect happens via the user/isAdmin effect below.
+      navigate("/auth", { replace: true });
+      setIsOAuthCallbackLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [location.search, navigate, toast]);
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth`,
           queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+            access_type: "offline",
+            prompt: "consent",
           },
         },
       });
@@ -107,16 +153,18 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* 3D Robot Background */}
-      <Suspense fallback={
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Cpu className="w-16 h-16 text-primary/20 animate-pulse" />
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Cpu className="w-16 h-16 text-primary/20 animate-pulse" />
+          </div>
+        }
+      >
         <Robot3D />
       </Suspense>
 
       <Header />
-      
+
       <main className="container pt-20 pb-12 px-4 relative z-10">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8 animate-fade-up">
@@ -145,18 +193,18 @@ export default function Auth() {
                 variant="outline"
                 className="w-full h-12 relative overflow-hidden group border-border/50 hover:border-primary/50 transition-all duration-300"
                 onClick={handleGoogleSignIn}
-                disabled={isGoogleLoading}
+                disabled={oauthLoading}
               >
                 {/* Magical glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
+
                 {/* Shimmer effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </div>
 
                 <span className="relative flex items-center justify-center gap-3">
-                  {isGoogleLoading ? (
+                  {oauthLoading ? (
                     <div className="w-5 h-5 border-2 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
                   ) : (
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -179,7 +227,7 @@ export default function Auth() {
                     </svg>
                   )}
                   <span className="font-medium">
-                    {isGoogleLoading ? "Signing in..." : "Continue with Google"}
+                    {oauthLoading ? "Signing in..." : "Continue with Google"}
                   </span>
                 </span>
               </Button>
