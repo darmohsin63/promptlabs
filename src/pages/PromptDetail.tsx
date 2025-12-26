@@ -9,6 +9,8 @@ import { Link as RouterLink } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { ProtectedImage } from "@/components/ProtectedImage";
 import { CodeStyledPrompt } from "@/components/CodeStyledPrompt";
+import { StarRating } from "@/components/StarRating";
+import { useRatings, useMaxStars } from "@/hooks/useRatings";
 
 const PromptDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,8 @@ const PromptDetail = () => {
   const [saving, setSaving] = useState(false);
   const [prompt, setPrompt] = useState<Prompt | null>(null);
   const [loading, setLoading] = useState(true);
+  const { stats, ratePrompt } = useRatings(id);
+  const { maxStars } = useMaxStars();
 
   const saved = id ? isSaved(id) : false;
 
@@ -173,6 +177,18 @@ const PromptDetail = () => {
                   Approved by {prompt.approver_name}
                 </span>
               )}
+
+              {/* Rating Section */}
+              <div className="glass-card !rounded-full px-4 py-2 flex items-center gap-2">
+                <StarRating
+                  maxStars={maxStars}
+                  rating={stats.averageRating}
+                  readonly
+                  size="sm"
+                  showValue
+                  totalRatings={stats.totalRatings}
+                />
+              </div>
             </div>
 
             {prompt.description && (
@@ -240,9 +256,47 @@ const PromptDetail = () => {
               )}
             </div>
 
+            {/* User Rating Section */}
+            {user && (
+              <div className="mb-8 animate-fade-up stagger-3">
+                <div className="glass-panel">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-1">Rate this prompt</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {stats.userRating 
+                          ? `You rated this ${stats.userRating}/${maxStars} stars` 
+                          : "Click the stars to rate"}
+                      </p>
+                    </div>
+                    <StarRating
+                      maxStars={maxStars}
+                      rating={stats.userRating || 0}
+                      onRate={async (rating) => {
+                        const { error } = await ratePrompt(rating);
+                        if (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to submit rating",
+                            variant: "destructive",
+                          });
+                        } else {
+                          toast({
+                            title: "Thanks!",
+                            description: `You rated this prompt ${rating}/${maxStars} stars`,
+                          });
+                        }
+                      }}
+                      size="lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             {user ? (
-              <div className="flex flex-col sm:flex-row gap-3 animate-fade-up stagger-3">
+              <div className="flex flex-col sm:flex-row gap-3 animate-fade-up stagger-4">
                 <button 
                   onClick={handleCopy} 
                   className={`btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none transition-all duration-200 ${copied ? 'bg-green-600 hover:bg-green-600' : ''}`}

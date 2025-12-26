@@ -144,6 +144,14 @@ export default function AdminDashboard() {
       href: "/admin/featured",
     },
     {
+      icon: Star,
+      iconBg: "bg-yellow-500/10",
+      iconColor: "text-yellow-500",
+      value: "⭐",
+      label: "Ratings",
+      href: "/admin/ratings",
+    },
+    {
       icon: Megaphone,
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
