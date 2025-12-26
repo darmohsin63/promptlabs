@@ -1,5 +1,5 @@
 import { Sparkles, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
@@ -7,6 +7,7 @@ import { PromptCard } from "@/components/PromptCard";
 import { PromptCardSkeleton } from "@/components/PromptCardSkeleton";
 import { usePrompts } from "@/hooks/usePrompts";
 import { useFeaturedPrompts } from "@/hooks/useFeaturedPrompts";
+import { usePromptsRatings, useMaxStars } from "@/hooks/useRatings";
 import { HeroSection } from "@/components/HeroSection";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ const Index = () => {
   const [gridSize, setGridSize] = useState<"normal" | "compact">("normal");
   const { prompts, loading } = usePrompts();
   const { promptOfDay, trending, creatorsChoice, loading: featuredLoading } = useFeaturedPrompts();
+  const { maxStars } = useMaxStars();
 
   // Filter prompts - only show non-scheduled or past-scheduled prompts
   const filteredPrompts = prompts.filter((prompt) => {
@@ -35,6 +37,10 @@ const Index = () => {
 
   // Only show latest 6 prompts on home page
   const latestPrompts = filteredPrompts.slice(0, 6);
+
+  // Fetch ratings for visible prompts
+  const promptIds = useMemo(() => latestPrompts.map(p => p.id), [latestPrompts]);
+  const { ratingsMap } = usePromptsRatings(promptIds);
 
   const toggleGridSize = () => {
     setGridSize(prev => prev === "normal" ? "compact" : "normal");
@@ -91,7 +97,13 @@ const Index = () => {
                   : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
               }`}>
                 {latestPrompts.map((prompt, index) => (
-                  <PromptCard key={prompt.id} prompt={prompt} index={index} />
+                  <PromptCard 
+                    key={prompt.id} 
+                    prompt={prompt} 
+                    index={index} 
+                    ratingData={ratingsMap.get(prompt.id) || null}
+                    maxStars={maxStars}
+                  />
                 ))}
               </div>
             ) : (

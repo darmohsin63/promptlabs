@@ -1,10 +1,11 @@
 import { Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import { PromptCard } from "@/components/PromptCard";
 import { PromptCardSkeleton } from "@/components/PromptCardSkeleton";
 import { usePrompts } from "@/hooks/usePrompts";
+import { usePromptsRatings, useMaxStars } from "@/hooks/useRatings";
 import { Footer } from "@/components/Footer";
 import { GridToggle } from "@/components/GridToggle";
 
@@ -12,6 +13,7 @@ const Prompts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [gridSize, setGridSize] = useState<"normal" | "compact">("normal");
   const { prompts, loading } = usePrompts();
+  const { maxStars } = useMaxStars();
 
   // Filter prompts - only show non-scheduled or past-scheduled prompts
   const filteredPrompts = prompts.filter((prompt) => {
@@ -31,6 +33,10 @@ const Prompts = () => {
   const sortedPrompts = [...filteredPrompts].sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+
+  // Fetch ratings for all visible prompts
+  const promptIds = useMemo(() => sortedPrompts.map(p => p.id), [sortedPrompts]);
+  const { ratingsMap } = usePromptsRatings(promptIds);
 
   const toggleGridSize = () => {
     setGridSize(prev => prev === "normal" ? "compact" : "normal");
@@ -108,7 +114,12 @@ const Prompts = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.3 }}
                   >
-                    <PromptCard prompt={prompt} index={index} />
+                    <PromptCard 
+                      prompt={prompt} 
+                      index={index} 
+                      ratingData={ratingsMap.get(prompt.id) || null}
+                      maxStars={maxStars}
+                    />
                   </motion.div>
                 ))}
               </motion.div>
