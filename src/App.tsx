@@ -21,6 +21,7 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminFeedback = lazy(() => import("./pages/admin/AdminFeedback"));
 const AdminFeatured = lazy(() => import("./pages/admin/AdminFeatured"));
 const AdminAds = lazy(() => import("./pages/admin/AdminAds"));
+const AdminRatings = lazy(() => import("./pages/admin/AdminRatings"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const About = lazy(() => import("./pages/About"));
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/admin/feedback" element={<AdminFeedback />} />
                 <Route path="/admin/featured" element={<AdminFeatured />} />
                 <Route path="/admin/ads" element={<AdminAds />} />
+                <Route path="/admin/ratings" element={<AdminRatings />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/about" element={<About />} />
