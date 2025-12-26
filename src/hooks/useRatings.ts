@@ -134,3 +134,56 @@ export function useMaxStars() {
 
   return { maxStars, loading, updateMaxStars, refetch: fetchMaxStars };
 }
+
+// Hook to fetch ratings for multiple prompts (for prompt cards)
+export function usePromptsRatings(promptIds: string[]) {
+  const [ratingsMap, setRatingsMap] = useState<Map<string, { average: number; count: number }>>(new Map());
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (promptIds.length === 0) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchAllRatings = async () => {
+      const { data, error } = await supabase
+        .from("prompt_ratings")
+        .select("prompt_id, rating")
+        .in("prompt_id", promptIds);
+
+      if (error) {
+        console.error("Error fetching ratings:", error);
+        setLoading(false);
+        return;
+      }
+
+      const map = new Map<string, { average: number; count: number }>();
+      
+      // Group ratings by prompt_id
+      const grouped = data?.reduce((acc, r) => {
+        if (!acc[r.prompt_id]) {
+          acc[r.prompt_id] = [];
+        }
+        acc[r.prompt_id].push(r.rating);
+        return acc;
+      }, {} as Record<string, number[]>) || {};
+
+      // Calculate averages
+      Object.entries(grouped).forEach(([promptId, ratings]) => {
+        const sum = ratings.reduce((a, b) => a + b, 0);
+        map.set(promptId, {
+          average: sum / ratings.length,
+          count: ratings.length,
+        });
+      });
+
+      setRatingsMap(map);
+      setLoading(false);
+    };
+
+    fetchAllRatings();
+  }, [promptIds.join(",")]);
+
+  return { ratingsMap, loading };
+}

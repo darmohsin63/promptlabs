@@ -191,6 +191,8 @@ export type Database = {
       }
       prompts: {
         Row: {
+          admin_rating: number | null
+          admin_rating_count: number | null
           approved_at: string | null
           approved_by: string | null
           author: string
@@ -208,6 +210,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_rating?: number | null
+          admin_rating_count?: number | null
           approved_at?: string | null
           approved_by?: string | null
           author: string
@@ -225,6 +229,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_rating?: number | null
+          admin_rating_count?: number | null
           approved_at?: string | null
           approved_by?: string | null
           author?: string

@@ -1,14 +1,17 @@
 import { Link } from "react-router-dom";
-import { Calendar, User, Bookmark, Clock, Tag } from "lucide-react";
+import { Calendar, User, Bookmark, Clock, Tag, Star } from "lucide-react";
 import { Prompt } from "@/hooks/usePrompts";
 import { useSavedPrompts } from "@/hooks/useSavedPrompts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ProtectedImage } from "@/components/ProtectedImage";
+
 interface PromptCardProps {
   prompt: Prompt & { is_approved?: boolean };
   index: number;
   showStatus?: boolean;
+  ratingData?: { average: number; count: number } | null;
+  maxStars?: number;
 }
 
 const getOptimizedImageUrl = (url: string, width: number) => {
@@ -22,7 +25,7 @@ const getOptimizedImageUrl = (url: string, width: number) => {
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60";
 
-export function PromptCard({ prompt, index, showStatus }: PromptCardProps) {
+export function PromptCard({ prompt, index, showStatus, ratingData, maxStars = 5 }: PromptCardProps) {
   const { user } = useAuth();
   const { isSaved, toggleSave } = useSavedPrompts();
   const { toast } = useToast();
@@ -63,6 +66,11 @@ export function PromptCard({ prompt, index, showStatus }: PromptCardProps) {
   };
 
   const isPending = prompt.is_approved === false;
+
+  // Use admin rating if set, otherwise use user ratings
+  const displayRating = prompt.admin_rating ?? ratingData?.average ?? 0;
+  const displayCount = prompt.admin_rating_count ?? ratingData?.count ?? 0;
+  const hasRating = displayRating > 0;
 
   return (
     <Link
@@ -105,6 +113,19 @@ export function PromptCard({ prompt, index, showStatus }: PromptCardProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        
+        {/* Rating overlay on image */}
+        {hasRating && (
+          <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-background/80 backdrop-blur-sm">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span className="text-xs font-medium text-foreground">
+              {displayRating.toFixed(1)}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              ({displayCount})
+            </span>
+          </div>
+        )}
       </div>
       <div className="p-4 md:p-5">
         <h3 className="font-semibold text-base md:text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors duration-300">

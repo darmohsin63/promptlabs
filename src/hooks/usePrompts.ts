@@ -18,6 +18,8 @@ export interface Prompt {
   updated_at: string | null;
   category: string[] | null;
   approver_name?: string | null;
+  admin_rating: number | null;
+  admin_rating_count: number | null;
 }
 
 export function usePrompts() {
