@@ -7,15 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { TableSkeleton } from "@/components/TableSkeleton";
-import { StarRating } from "@/components/StarRating";
-import { useMaxStars } from "@/hooks/useRatings";
-import { ArrowLeft, Trash2, Search, Eye, Pencil, Check, Clock, Sparkles, Star, X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ArrowLeft, Trash2, Search, Eye, Pencil, Check, Clock, Sparkles } from "lucide-react";
 
 interface Prompt {
   id: string;
@@ -25,8 +17,6 @@ interface Prompt {
   scheduled_at: string | null;
   is_approved: boolean | null;
   category: string[] | null;
-  admin_rating: number | null;
-  admin_rating_count: number | null;
 }
 
 export default function AdminPrompts() {
@@ -39,14 +29,6 @@ export default function AdminPrompts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dataLoading, setDataLoading] = useState(true);
   const [categorizing, setCategorizing] = useState(false);
-  const { maxStars } = useMaxStars();
-  
-  // Rating dialog state
-  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
-  const [editRating, setEditRating] = useState(0);
-  const [editRatingCount, setEditRatingCount] = useState("");
-  const [savingRating, setSavingRating] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -62,7 +44,7 @@ export default function AdminPrompts() {
     setDataLoading(true);
     const { data } = await supabase
       .from("prompts")
-      .select("id, title, author, created_at, scheduled_at, is_approved, category, admin_rating, admin_rating_count")
+      .select("id, title, author, created_at, scheduled_at, is_approved, category")
       .order("created_at", { ascending: false });
     if (data) setPrompts(data);
     setDataLoading(false);
@@ -111,64 +93,6 @@ export default function AdminPrompts() {
     } else {
       toast({ title: "Deleted", description: "Prompt removed." });
       setPrompts(prompts.filter(p => p.id !== id));
-    }
-  };
-
-  const openRatingDialog = (prompt: Prompt) => {
-    setSelectedPrompt(prompt);
-    setEditRating(prompt.admin_rating || 0);
-    setEditRatingCount(prompt.admin_rating_count?.toString() || "");
-    setRatingDialogOpen(true);
-  };
-
-  const saveRating = async () => {
-    if (!selectedPrompt) return;
-    
-    setSavingRating(true);
-    const { error } = await supabase
-      .from("prompts")
-      .update({ 
-        admin_rating: editRating || null, 
-        admin_rating_count: editRatingCount ? parseInt(editRatingCount) : null 
-      })
-      .eq("id", selectedPrompt.id);
-    
-    setSavingRating(false);
-    
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Saved", description: "Rating updated successfully." });
-      setPrompts(prompts.map(p => 
-        p.id === selectedPrompt.id 
-          ? { ...p, admin_rating: editRating || null, admin_rating_count: editRatingCount ? parseInt(editRatingCount) : null } 
-          : p
-      ));
-      setRatingDialogOpen(false);
-    }
-  };
-
-  const clearRating = async () => {
-    if (!selectedPrompt) return;
-    
-    setSavingRating(true);
-    const { error } = await supabase
-      .from("prompts")
-      .update({ admin_rating: null, admin_rating_count: null })
-      .eq("id", selectedPrompt.id);
-    
-    setSavingRating(false);
-    
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Cleared", description: "Admin rating removed." });
-      setPrompts(prompts.map(p => 
-        p.id === selectedPrompt.id 
-          ? { ...p, admin_rating: null, admin_rating_count: null } 
-          : p
-      ));
-      setRatingDialogOpen(false);
     }
   };
 
@@ -239,13 +163,12 @@ export default function AdminPrompts() {
           <TableSkeleton />
         ) : (
           <div className="glass-table overflow-x-auto">
-            <table className="w-full min-w-[700px]">
+            <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-border/50">
                   <th className="text-left p-4 font-semibold text-foreground text-sm">Title</th>
                   <th className="text-left p-4 font-semibold text-foreground text-sm">Author</th>
                   <th className="text-left p-4 font-semibold text-foreground text-sm hidden md:table-cell">Date</th>
-                  <th className="text-left p-4 font-semibold text-foreground text-sm">Rating</th>
                   <th className="text-left p-4 font-semibold text-foreground text-sm">Status</th>
                   <th className="text-right p-4 font-semibold text-foreground text-sm">Actions</th>
                 </tr>
@@ -254,7 +177,6 @@ export default function AdminPrompts() {
                 {filteredPrompts.map((p) => {
                   const isPending = p.is_approved === false;
                   const isScheduled = p.scheduled_at && new Date(p.scheduled_at) > new Date();
-                  const hasAdminRating = p.admin_rating !== null;
                   return (
                     <tr key={p.id} className="border-b border-border/30 hover:bg-primary/5 transition-colors">
                       <td className="p-4">
@@ -263,22 +185,6 @@ export default function AdminPrompts() {
                       <td className="p-4 text-muted-foreground text-sm">{p.author}</td>
                       <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
                         {new Date(p.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="p-4">
-                        <button
-                          onClick={() => openRatingDialog(p)}
-                          className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-secondary/50 transition-colors"
-                        >
-                          {hasAdminRating ? (
-                            <div className="flex items-center gap-1.5">
-                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                              <span className="text-sm font-medium">{p.admin_rating?.toFixed(1)}</span>
-                              <span className="text-xs text-muted-foreground">({p.admin_rating_count})</span>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">Set rating</span>
-                          )}
-                        </button>
                       </td>
                       <td className="p-4">
                         <div className="flex gap-1 flex-wrap">
@@ -349,63 +255,6 @@ export default function AdminPrompts() {
           </div>
         )}
       </main>
-
-      {/* Rating Dialog */}
-      <Dialog open={ratingDialogOpen} onOpenChange={setRatingDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Set Admin Rating</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Prompt</p>
-              <p className="font-medium">{selectedPrompt?.title}</p>
-            </div>
-            
-            <div>
-              <p className="text-sm text-muted-foreground mb-3">Rating (out of {maxStars})</p>
-              <StarRating
-                maxStars={maxStars}
-                rating={editRating}
-                onRate={setEditRating}
-                size="lg"
-              />
-            </div>
-
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Number of ratings to display</p>
-              <Input
-                type="number"
-                placeholder="e.g. 150"
-                value={editRatingCount}
-                onChange={(e) => setEditRatingCount(e.target.value)}
-                min="0"
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                onClick={saveRating}
-                disabled={savingRating || editRating === 0}
-                className="flex-1"
-              >
-                {savingRating ? "Saving..." : "Save Rating"}
-              </Button>
-              {selectedPrompt?.admin_rating !== null && (
-                <Button
-                  variant="outline"
-                  onClick={clearRating}
-                  disabled={savingRating}
-                  className="flex items-center gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  Clear
-                </Button>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
