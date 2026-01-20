@@ -1,0 +1,53 @@
+name: Build Prompt Hub APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Web Project
+      run: npm run build
+      # This compiles your TS/Tailwind code into the 'dist' folder
+
+    - name: Setup Cordova
+      run: |
+        npm install -g cordova
+        # CUSTOM NAMES APPLIED HERE:
+        cordova create myApp com.prompthub.com "Prompt Hub"
+        cd myApp
+        cordova platform add android
+        
+    - name: Move Built Files to App
+      run: |
+        # Clear default Cordova files
+        rm -rf myApp/www/*
+        # Copy YOUR built files (from the 'dist' folder) into Cordova
+        cp -r dist/* myApp/www/
+        
+    - name: Build APK
+      run: |
+        cd myApp
+        cordova build android --release -- --packageType=apk
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: prompt-hub-release
+        path: myApp/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        
